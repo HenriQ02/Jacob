@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#f5f7fa">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -14,137 +14,196 @@ function applyTheme(){
   var m = "auto"; try { m = localStorage.getItem("gastos.theme") || "auto"; } catch(e){}
   var dark = m === "dark" || (m === "auto" && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.dataset.theme = dark ? "dark" : "light";
-  var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = dark ? "#121417" : "#1f3a5f";
+  var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = dark ? "#121417" : "#f5f7fa";
 }
 applyTheme();
 if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
 </script>
 <style>
 :root{
-  --bg:#f3f5f9; --card:#fff; --text:#16202c; --muted:#6b7686; --line:#e3e7ee;
-  --primary:#1f3a5f; --accent:#2f6fde; --red:#d33a3a; --green:#1f9d5a; --chip:#eef2f8;
-  --radius:16px;
+  --bg:#f5f7fa; --card:#fff; --raised:#eceff4; --line:rgba(17,24,39,.08); --dash:rgba(17,24,39,.24);
+  --text:#111827; --text-2:#4b5565; --muted:#6b7487;
+  --accent:#2f6fde; --on-accent:#fff; --sel:#e6eefc;
+  --red:#dc2626; --green:#15803d; --amber:#b7791f; --bar:#c9cfd9;
+  --shadow:0 1px 2px rgba(17,24,39,.05); --nav:#fff; --seg-on:#fff;
+  --toast-bg:#111827; --toast-fg:#f5f7fa; --toast-act:#8fb6ff;
+  --chip:var(--raised);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
 }
-html[data-theme="dark"]{--bg:#121417; --card:#1c1f24; --text:#e6e8eb; --muted:#8a919c; --line:#2a2f36;
-  --primary:#e6e8eb; --accent:#4c8dff; --chip:#252a31; --red:#ff6161; --green:#38c98a; --radius:14px; color-scheme:dark}
-html[data-theme="dark"] .card, html[data-theme="dark"] .kpi, html[data-theme="dark"] .tx{box-shadow:none; border:1px solid var(--line)}
-html[data-theme="dark"] nav{background:#16191d}
-html[data-theme="dark"] .chip.on{background:#1f2c44}
-html[data-theme="dark"] .seg button.on{background:#3a414c}
-html[data-theme="dark"] .toast{background:#e6e8eb; color:#121417}
+/* Escuro "Grafite" (escolhido pelo utilizador) */
+html[data-theme="dark"]{
+  --bg:#121417; --card:#1c1f24; --raised:#252a31; --line:#2a2f36; --dash:#3d444f;
+  --text:#e6e8eb; --text-2:#b4bac3; --muted:#8a919c;
+  --accent:#4c8dff; --on-accent:#0b1220; --sel:#1f2c44;
+  --red:#ff6161; --green:#38c98a; --amber:#e0a43a; --bar:#3a414c;
+  --shadow:none; --nav:#16191d; --seg-on:#3a414c;
+  --toast-bg:#e6e8eb; --toast-fg:#121417; --toast-act:#2f6fde;
+  color-scheme:dark;
+}
 html[data-theme="dark"] dialog::backdrop{background:rgba(0,0,0,.65)}
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html,body{margin:0; background:var(--bg); color:var(--text);
-  font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+b,strong{font-weight:500}
+button{cursor:pointer; transition:background-color .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease),transform .12s var(--ease)}
+button:active{transform:scale(.98)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.i{width:18px; height:18px; display:block; flex:none}
+.num,.v,.kpi b,.amount{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
 header{position:sticky; top:0; z-index:5; background:var(--bg);
-  padding:calc(env(safe-area-inset-top) + 14px) 18px 8px; display:flex; align-items:center; justify-content:space-between}
-header h1{font-size:22px; margin:0}
-main{padding:0 14px calc(90px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto}
-nav{position:fixed; bottom:0; left:0; right:0; z-index:10; background:var(--card); border-top:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 16px) 16px 12px; display:flex; align-items:center; justify-content:space-between}
+header h1{font-size:24px; line-height:1.15; font-weight:500; margin:0}
+main{padding:0 16px calc(96px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto}
+.hdrbtn{border:1px solid var(--line); background:var(--card); color:var(--text-2); width:40px; height:40px; border-radius:10px; display:grid; place-items:center; padding:0; box-shadow:var(--shadow)}
+.hdrbtn .i{width:20px; height:20px}
+
+nav{position:fixed; bottom:0; left:0; right:0; z-index:10; background:var(--nav); border-top:1px solid var(--line);
   display:flex; padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1; min-width:0; background:none; border:0; padding:10px 0 12px; color:var(--muted); font-size:12px; display:flex; flex-direction:column; align-items:center; gap:2px}
-nav button .ic{font-size:22px; line-height:1}
-nav button.on{color:var(--accent); font-weight:600}
-.card{background:var(--card); border-radius:var(--radius); padding:16px; margin:10px 0; box-shadow:0 1px 2px rgba(0,0,0,.04)}
+nav button{flex:1; min-width:0; background:none; border:0; padding:8px 0 12px; color:var(--muted); font:inherit; font-size:12px; line-height:16px; display:flex; flex-direction:column; align-items:center; gap:4px}
+nav button .i{width:22px; height:22px}
+nav button.on{color:var(--accent); font-weight:500}
+nav button:active{transform:none}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; margin:12px 0; box-shadow:var(--shadow)}
 .hidden{display:none!important}
-label{display:block; font-size:13px; color:var(--muted); margin:12px 0 6px}
-input,select,textarea{width:100%; font:inherit; color:var(--text); background:var(--chip); border:1px solid transparent; border-radius:12px; padding:12px}
+h2{font-size:15px; line-height:20px; font-weight:500; margin:0 0 12px}
+label{display:block; font-size:13px; line-height:16px; color:var(--muted); margin:16px 0 8px}
+input,select,textarea{width:100%; font:inherit; color:var(--text); background:var(--raised); border:1px solid transparent; border-radius:10px; padding:12px; min-height:48px}
+input::placeholder{color:var(--muted)}
 input:focus,select:focus{outline:none; border-color:var(--accent)}
-.amount{font-size:40px; font-weight:700; text-align:center; padding:14px; background:transparent; border-bottom:2px solid var(--line); border-radius:0}
-.seg{display:flex; background:var(--chip); border-radius:12px; padding:4px; gap:4px}
-.seg button{flex:1; border:0; background:none; padding:10px; border-radius:9px; font:inherit; color:var(--muted)}
-.seg button.on{background:var(--card); color:var(--text); font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.seg button.on.d{color:var(--red)} .seg button.on.r{color:var(--green)}
-.chips{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
-.chip{border:2px solid transparent; background:var(--chip); border-radius:12px; padding:10px 4px; text-align:center; font-size:12px; color:var(--text)}
-.chip .e{font-size:22px; display:block}
-.chip.on{border-color:var(--accent); background:color-mix(in srgb,var(--accent) 12%,var(--card))}
-.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-.btn{display:block; width:100%; border:0; border-radius:14px; padding:15px; font:inherit; font-weight:600; background:var(--accent); color:#fff; margin-top:16px}
-.btn.sec{background:var(--chip); color:var(--text)}
-.btn.danger{background:transparent; color:var(--red); border:1px solid var(--red)}
-.btn.small{padding:10px; margin-top:8px; font-size:14px}
-.monthnav{display:flex; align-items:center; justify-content:space-between; margin:4px 0}
-.monthnav button{border:0; background:var(--card); color:var(--text); width:44px; height:44px; border-radius:12px; font-size:20px}
-.monthnav b{font-size:17px; text-transform:capitalize}
+.amount{font-size:48px; line-height:1; font-weight:500; letter-spacing:-.02em; text-align:center; padding:16px 0 16px; min-height:0;
+  background:transparent; border:0; border-bottom:1px dashed var(--dash); border-radius:0}
+.amount:focus{border-color:transparent; border-bottom-color:var(--accent)}
+.amount::placeholder{color:var(--muted); opacity:.6}
+
+.seg{display:flex; background:var(--raised); border-radius:10px; padding:4px; gap:4px}
+.seg button{flex:1; border:0; background:none; padding:8px; border-radius:6px; font:inherit; font-size:14px; color:var(--text-2)}
+.seg button.on{background:var(--seg-on); color:var(--text); font-weight:500; box-shadow:var(--shadow)}
+
+.chips{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+.chip{display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:8px; min-width:0; min-height:64px; border:1px solid transparent; background:var(--raised); border-radius:10px; padding:12px 8px 12px 12px; text-align:left; font:inherit; font-size:13px; line-height:16px; color:var(--text); hyphens:auto}
+.chip > span{max-width:100%}
+.chip.src{flex-direction:row; align-items:center; justify-content:center; min-height:40px; padding:8px 12px; text-align:center}
+.chip.on{border-color:var(--accent); background:var(--sel)}
+.dot{width:8px; height:8px; border-radius:50%; flex:none; display:inline-block; background:var(--muted)}
+.dot.hollow{background:none; border:1.5px solid var(--muted)}
+
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.btn{display:block; width:100%; min-height:48px; border:0; border-radius:12px; padding:12px 16px; font:inherit; font-weight:500; background:var(--accent); color:var(--on-accent); margin-top:16px}
+.btn.sec{background:var(--raised); color:var(--text); border:1px solid var(--line)}
+.btn.danger{background:transparent; color:var(--red); border:1px solid color-mix(in srgb,var(--red) 45%,transparent)}
+.btn.small{min-height:40px; padding:8px 12px; margin-top:8px; font-size:14px; border-radius:10px}
+
+.monthnav{display:flex; align-items:center; justify-content:space-between; margin:4px 0 12px}
+.monthnav button{border:1px solid var(--line); background:var(--card); color:var(--text-2); width:40px; height:40px; border-radius:10px; display:grid; place-items:center; padding:0; box-shadow:var(--shadow)}
+.monthnav b{font-size:16px; font-weight:500; text-transform:capitalize}
+.search{margin:0 0 12px}
+
 .kpis{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
-.kpi{background:var(--card); border-radius:14px; padding:12px 10px}
-.kpi small{color:var(--muted); font-size:12px; display:block}
-.kpi b{font-size:16px}
+.kpi{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:var(--shadow); min-width:0}
+.kpi small{color:var(--muted); font-size:12px; line-height:16px; display:block; margin-bottom:4px}
+.kpi b{font-size:15px; line-height:20px; font-weight:500; display:block; white-space:nowrap}
+.kpi small.up,.kpi small.down{margin:4px 0 0; font-family:var(--mono)}
 .pos{color:var(--green)} .neg{color:var(--red)}
-.day{font-size:13px; color:var(--muted); margin:16px 4px 6px; display:flex; justify-content:space-between}
-.tx{display:flex; align-items:center; gap:12px; padding:12px; background:var(--card); border-radius:14px; margin-bottom:6px}
-.tx .e{font-size:22px; width:40px; height:40px; display:grid; place-items:center; background:var(--chip); border-radius:12px; flex:none}
+
+.day{font-size:12px; line-height:16px; color:var(--muted); margin:20px 4px 8px; display:flex; justify-content:space-between}
+.day .num{font-size:12px}
+.group{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:0 16px; box-shadow:var(--shadow)}
+.tx{display:flex; align-items:center; gap:12px; min-height:60px; padding:12px 0; border-top:1px solid var(--line)}
+.tx:first-child{border-top:0}
 .tx .t{flex:1; min-width:0}
 .tx .t div{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.tx .t small{color:var(--muted)}
-.tx .v{font-weight:600; white-space:nowrap}
-.bar{height:8px; background:var(--chip); border-radius:6px; overflow:hidden; margin-top:6px}
-.bar i{display:block; height:100%; background:var(--accent); border-radius:6px}
+.tx .t small{color:var(--muted); font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.v{font-size:15px; font-weight:500; white-space:nowrap}
+
+.bar{height:6px; background:var(--raised); border-radius:4px; overflow:hidden; margin:8px 0 4px}
+.bar i{display:block; height:100%; background:var(--bar); border-radius:4px}
+.bar i.acc{background:var(--accent)}
+.bar i.warn{background:var(--amber)}
 .bar i.over{background:var(--red)}
-.catline{padding:10px 0; border-bottom:1px solid var(--line)}
-.catline:last-child{border:0}
-.catline .top{display:flex; justify-content:space-between; gap:8px}
-.catline small{color:var(--muted)}
-.hist{display:flex; align-items:flex-end; gap:6px; height:130px; padding-top:10px}
-.hist div{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; font-size:11px; color:var(--muted)}
-.hist span.b{width:100%; background:var(--accent); border-radius:6px 6px 0 0; min-height:2px}
-.hist div.cur span.b{background:var(--primary)}
-.empty{text-align:center; color:var(--muted); padding:40px 10px}
-.toast{position:fixed; left:50%; bottom:100px; transform:translateX(-50%); background:#16202c; color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:20}
-.toast.show{opacity:1}
-.setcat{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line)}
-.setcat .e{font-size:22px}
-.setcat .n{flex:1}
-.setcat small{color:var(--muted)}
-.setcat button{border:0; background:var(--chip); color:var(--text); border-radius:10px; padding:8px 12px; font:inherit; font-size:14px}
-dialog{border:0; border-radius:20px; padding:18px; width:min(92vw,420px); background:var(--card); color:var(--text)}
-dialog::backdrop{background:rgba(0,0,0,.45)}
-.hint{font-size:13px; color:var(--muted)}
-h2{font-size:16px; margin:4px 0 8px}
-.search{margin:6px 0}
-.hdrbtn{border:0; background:var(--card); color:var(--text); width:42px; height:42px; border-radius:12px; font-size:20px}
-html[data-theme="dark"] .hdrbtn{border:1px solid var(--line)}
-.banner{display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:14px; padding:10px 12px; margin:8px 0; font-size:14px}
-.banner.warn{border-left-color:#e0a100}
-.banner .t{flex:1}
-.banner button, .mini{border:0; background:var(--chip); color:var(--text); border-radius:10px; padding:8px 11px; font:inherit; font-size:14px; white-space:nowrap}
-.banner button.ok{background:var(--green); color:#fff}
-.quick{display:flex; gap:8px; overflow-x:auto; padding:2px 0 6px; scrollbar-width:none}
-.quick::-webkit-scrollbar{display:none}
-.quick button{flex:none; border:1px solid var(--line); background:var(--card); color:var(--text); border-radius:20px; padding:9px 14px; font:inherit; font-size:14px}
-.quick button b{font-weight:600; margin-left:4px}
-.links{display:flex; gap:8px; margin-top:10px}
-.links button{flex:1; border:0; background:none; color:var(--accent); font:inherit; font-size:14px; padding:8px}
-.delta{font-size:12px; margin-left:6px}
-.up{color:var(--red)} .down{color:var(--green)}
-.donutwrap{display:flex; align-items:center; gap:16px}
-.donut{width:130px; height:130px; border-radius:50%; flex:none; position:relative}
-.donut::after{content:""; position:absolute; inset:24px; border-radius:50%; background:var(--card)}
-.legend{flex:1; font-size:13px; min-width:0}
-.legend div{display:flex; align-items:center; gap:6px; margin:3px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.legend i{width:10px; height:10px; border-radius:3px; flex:none}
-.legend span{margin-left:auto; color:var(--muted); padding-left:6px}
-.forecast{font-size:14px}
-.forecast b{font-size:20px; display:block; margin:2px 0}
+.catline{padding:12px 0; border-top:1px solid var(--line)}
+.catline:first-child{border-top:0; padding-top:0}
+.catline .top{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.catline .top > span:first-child{display:flex; align-items:center; gap:8px; min-width:0}
+.catline small{color:var(--muted); font-size:13px}
+.catline small.num{font-size:12px}
+.catline.total{border-top:1px dashed var(--dash); padding-bottom:0}
+.catline.lead{padding-bottom:16px}
+
+.hist{display:flex; align-items:flex-end; gap:8px; height:176px; padding-top:8px}
+.hist div{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; height:100%; font-family:var(--mono); font-size:11px; line-height:16px; color:var(--muted)}
+.hist span.b{width:100%; background:var(--bar); border-radius:4px 4px 0 0; min-height:2px}
+.hist div.cur{color:var(--text)}
+.hist div.cur span.b{background:var(--accent)}
+
+.stack{display:flex; gap:2px; height:12px; border-radius:6px; overflow:hidden; margin:4px 0 16px}
+.stack i{display:block; height:100%; min-width:2px}
+.legend{font-size:13px}
+.legend div{display:flex; align-items:center; gap:8px; padding:4px 0; min-width:0}
+.legend div > span:first-of-type{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.legend .num{color:var(--muted); font-size:12px}
+
+.forecast small.lbl{display:block; color:var(--muted); font-size:13px}
+.forecast b{display:block; font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:28px; line-height:1; font-weight:500; margin:8px 0 12px}
+.forecast p{margin:0; font-size:13px; color:var(--text-2)}
 svg.line{width:100%; height:140px; overflow:visible}
-svg.line text{fill:var(--muted); font-size:10px}
-.item{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line)}
-.item:last-child{border:0}
-.item .e{font-size:22px; width:36px; text-align:center}
+svg.line text{fill:var(--muted); font-family:var(--mono); font-size:10px}
+
+.empty{text-align:center; color:var(--muted); font-size:14px; padding:32px 16px}
+.hint{font-size:13px; color:var(--muted); margin:0 0 12px}
+
+.item{display:flex; align-items:center; gap:12px; min-height:48px; padding:12px 0; border-top:1px solid var(--line)}
+.item:first-child, label + .item{border-top:0}
 .item .t{flex:1; min-width:0}
-.item .t small{color:var(--muted); display:block}
-.item .v{font-weight:600; white-space:nowrap}
-.sectionhead{display:flex; justify-content:space-between; align-items:center}
+.item .t small{color:var(--muted); font-size:13px; display:block}
+.item.total{border-top:1px dashed var(--dash); font-weight:500}
+.item .bar{margin:8px 0 4px}
+
+.sectionhead{display:flex; justify-content:space-between; align-items:center; margin-bottom:4px}
 .sectionhead h2{margin:0}
+.mini,.setcat button,.banner button{display:inline-flex; align-items:center; gap:4px; height:32px; border:1px solid var(--line); background:var(--raised); color:var(--text); border-radius:8px; padding:0 12px; font:inherit; font-size:13px; white-space:nowrap}
+.mini .i{width:16px; height:16px; color:var(--text-2)}
+
+.setcat{display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 0; border-top:1px solid var(--line)}
+.setcat:first-child{border-top:0}
+.setcat .n{flex:1; min-width:0}
+.setcat small{color:var(--muted); font-size:13px}
+
+.banner{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin:8px 0; font-size:14px; box-shadow:var(--shadow)}
+.banner > .i{color:var(--muted)}
+.banner .t{flex:1; min-width:0}
+.banner .t small{display:block; color:var(--muted); font-size:13px}
+.banner button{height:36px}
+.banner button.ok,.banner button.no{width:36px; padding:0; justify-content:center}
+.banner button.ok{background:var(--accent); border-color:transparent; color:var(--on-accent)}
+
+.quick{display:flex; gap:8px; overflow-x:auto; padding:0 0 4px; scrollbar-width:none}
+.quick::-webkit-scrollbar{display:none}
+.quick button{flex:none; display:flex; align-items:center; gap:8px; height:40px; border:1px solid var(--line); background:var(--card); color:var(--text); border-radius:10px; padding:0 12px; font:inherit; font-size:14px; box-shadow:var(--shadow)}
+.quick button .num{color:var(--text-2); font-size:13px}
+
+.links{display:flex; gap:8px; margin-top:8px}
+.links button{flex:1; display:flex; align-items:center; justify-content:center; gap:8px; border:0; background:none; color:var(--accent); font:inherit; font-size:14px; font-weight:500; padding:8px; border-radius:8px}
+.links button .i{width:16px; height:16px}
+.delta{font-size:12px; margin-left:8px; font-family:var(--mono)}
+.up{color:var(--red)} .down{color:var(--green)}
+
+dialog{border:1px solid var(--line); border-radius:20px; padding:20px; width:min(92vw,420px); background:var(--card); color:var(--text)}
+dialog h2{font-size:17px; margin:0 0 4px}
+dialog::backdrop{background:rgba(17,24,39,.45)}
 .field{margin-top:4px}
-.toast{display:flex; gap:14px; align-items:center; pointer-events:auto; max-width:92vw}
-.toast button{border:0; background:none; color:#7fb0ff; font:inherit; font-weight:600; padding:0}
-.toast:not(.show){pointer-events:none}
+
+.toast{position:fixed; left:50%; bottom:calc(88px + env(safe-area-inset-bottom)); transform:translate(-50%,8px); display:flex; gap:16px; align-items:center;
+  background:var(--toast-bg); color:var(--toast-fg); padding:12px 16px; border-radius:12px; font-size:14px; max-width:92vw;
+  opacity:0; transition:opacity .2s var(--ease),transform .2s var(--ease); pointer-events:none; z-index:20}
+.toast.show{opacity:1; transform:translate(-50%,0); pointer-events:auto}
+.toast button{border:0; background:none; color:var(--toast-act); font:inherit; font-weight:500; padding:0}
 </style>
 </head>
 <body>
-<header><h1 id="title">Nova despesa</h1><button class="hdrbtn" id="gear" aria-label="Definições">⚙️</button></header>
+<header><h1 id="title">Nova despesa</h1><button class="hdrbtn" id="gear" aria-label="Definições"></button></header>
 
 <main>
   <div id="banners"></div>
@@ -161,9 +220,9 @@ svg.line text{fill:var(--muted); font-size:10px}
         <div><label>Conta / método</label><select id="method"></select></div>
       </div>
       <label>Descrição (opcional)</label>
-      <input id="note" placeholder="ex.: Continente, gasolina, jantar..." autocomplete="off">
+      <input id="note" placeholder="ex.: Continente, gasolina, jantar" autocomplete="off">
       <button class="btn" id="saveBtn">Guardar</button>
-      <div class="links" id="addLinks"><button id="mkQuick">☆ Criar atalho</button><button id="mkRecD">🔁 Recorrente</button></div>
+      <div class="links" id="addLinks"><button id="mkQuick"><span data-i="zap"></span>Criar atalho</button><button id="mkRecD"><span data-i="repeat"></span>Recorrente</button></div>
       <button class="btn sec hidden" id="cancelEdit">Cancelar</button>
       <button class="btn danger hidden" id="delBtn">Apagar despesa</button>
     </div>
@@ -173,10 +232,10 @@ svg.line text{fill:var(--muted); font-size:10px}
   <section id="v-inc" class="hidden">
     <div class="card">
       <input id="iAmount" class="amount" style="color:var(--green)" inputmode="decimal" placeholder="0,00 €" autocomplete="off">
-      <label>Fonte — de onde veio o dinheiro</label>
-      <input id="iSource" list="srcList" placeholder="ex.: Bolsa SASUM, Pais, OLX, Explicações..." autocomplete="off">
+      <label>Fonte, de onde veio o dinheiro</label>
+      <input id="iSource" list="srcList" placeholder="ex.: Bolsa SASUM, Pais, OLX" autocomplete="off">
       <datalist id="srcList"></datalist>
-      <div class="chips" id="srcQuick" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr));margin-top:8px"></div>
+      <div class="chips" id="srcQuick" style="grid-template-columns:repeat(3,1fr);margin-top:8px"></div>
       <label>Tipo de entrada</label>
       <div class="chips" id="iCatChips"></div>
       <div class="row2">
@@ -185,26 +244,26 @@ svg.line text{fill:var(--muted); font-size:10px}
       </div>
       <label>Nota (opcional)</label>
       <input id="iNote" autocomplete="off">
-      <button class="btn" id="iSave" style="background:var(--green)">Guardar entrada</button>
-      <div class="links" id="incLinks"><button id="mkRecR">🔁 Tornar recorrente</button></div>
+      <button class="btn" id="iSave">Guardar entrada</button>
+      <div class="links" id="incLinks"><button id="mkRecR"><span data-i="repeat"></span>Tornar recorrente</button></div>
       <button class="btn sec hidden" id="iCancel">Cancelar</button>
       <button class="btn danger hidden" id="iDel">Apagar entrada</button>
     </div>
-    <div class="monthnav"><button data-m="-1">‹</button><b class="mlabel"></b><button data-m="1">›</button></div>
+    <div class="monthnav"><button data-m="-1" aria-label="Mês anterior"><span data-i="left"></span></button><b class="mlabel"></b><button data-m="1" aria-label="Mês seguinte"><span data-i="right"></span></button></div>
     <div class="card"><h2>Entradas por fonte</h2><div id="srcSum"></div></div>
   </section>
 
   <!-- MOVIMENTOS -->
   <section id="v-list" class="hidden">
-    <div class="monthnav"><button data-m="-1">‹</button><b class="mlabel"></b><button data-m="1">›</button></div>
-    <input class="search" id="search" placeholder="Pesquisar..." autocomplete="off">
+    <div class="monthnav"><button data-m="-1" aria-label="Mês anterior"><span data-i="left"></span></button><b class="mlabel"></b><button data-m="1" aria-label="Mês seguinte"><span data-i="right"></span></button></div>
+    <input class="search" id="search" placeholder="Pesquisar" autocomplete="off">
     <div class="kpis" id="listKpis"></div>
     <div id="txList"></div>
   </section>
 
   <!-- RESUMO -->
   <section id="v-sum" class="hidden">
-    <div class="monthnav"><button data-m="-1">‹</button><b class="mlabel"></b><button data-m="1">›</button></div>
+    <div class="monthnav"><button data-m="-1" aria-label="Mês anterior"><span data-i="left"></span></button><b class="mlabel"></b><button data-m="1" aria-label="Mês seguinte"><span data-i="right"></span></button></div>
     <div class="kpis" id="sumKpis"></div>
     <div class="card forecast hidden" id="forecast"></div>
     <div class="card"><h2>Para onde foi o dinheiro</h2><div id="donut"></div></div>
@@ -216,16 +275,16 @@ svg.line text{fill:var(--muted); font-size:10px}
   <!-- CARTEIRA -->
   <section id="v-wal" class="hidden">
     <div class="card">
-      <div class="sectionhead"><h2>Contas</h2><button class="mini" id="transfer">↔ Transferir</button></div>
+      <div class="sectionhead"><h2>Contas</h2><button class="mini" id="transfer"><span data-i="swap"></span>Transferir</button></div>
       <div id="accounts"></div>
       <button class="btn sec small" id="setInit">Definir saldos iniciais</button>
     </div>
     <div class="card">
-      <div class="sectionhead"><h2>Metas de poupança</h2><button class="mini" id="newGoal">+ Nova</button></div>
+      <div class="sectionhead"><h2>Metas de poupança</h2><button class="mini" id="newGoal"><span data-i="plus"></span>Nova</button></div>
       <div id="goals"></div>
     </div>
     <div class="card">
-      <div class="sectionhead"><h2>Dívidas</h2><button class="mini" id="newDebt">+ Nova</button></div>
+      <div class="sectionhead"><h2>Dívidas</h2><button class="mini" id="newDebt"><span data-i="plus"></span>Nova</button></div>
       <div id="debts"></div>
     </div>
   </section>
@@ -235,14 +294,14 @@ svg.line text{fill:var(--muted); font-size:10px}
     <div class="card">
       <h2>Aparência</h2>
       <div class="seg" id="themeSeg">
-        <button data-th="light">☀️ Claro</button>
-        <button data-th="dark">🌙 Escuro</button>
-        <button data-th="auto">📱 Auto</button>
+        <button data-th="light">Claro</button>
+        <button data-th="dark">Escuro</button>
+        <button data-th="auto">Auto</button>
       </div>
-      <p class="hint" style="margin-bottom:0">Auto segue o modo do telemóvel.</p>
+      <p class="hint" style="margin:12px 0 0">Auto segue o modo do telemóvel.</p>
     </div>
     <div class="card"><h2>Gastos e entradas recorrentes</h2><p class="hint">Aparecem para confirmares no dia escolhido de cada mês.</p><div id="recList"></div></div>
-    <div class="card"><h2>Atalhos</h2><p class="hint">Cria-os em "Nova despesa" → ☆ Guardar como atalho.</p><div id="quickList"></div></div>
+    <div class="card"><h2>Atalhos</h2><p class="hint">Cria-os em Nova despesa → Criar atalho.</p><div id="quickList"></div></div>
     <div class="card">
       <h2>Categorias de despesa</h2><div id="catsD"></div>
       <button class="btn sec small" data-addcat="D">+ Nova categoria de despesa</button>
@@ -273,11 +332,11 @@ svg.line text{fill:var(--muted); font-size:10px}
 </main>
 
 <nav>
-  <button data-v="add" class="on"><span class="ic">➖</span>Despesa</button>
-  <button data-v="inc"><span class="ic">💶</span>Entradas</button>
-  <button data-v="list"><span class="ic">📋</span>Movimentos</button>
-  <button data-v="sum"><span class="ic">📊</span>Resumo</button>
-  <button data-v="wal"><span class="ic">👛</span>Carteira</button>
+  <button data-v="add" class="on"><span data-i="receipt"></span>Despesa</button>
+  <button data-v="inc"><span data-i="cash"></span>Entradas</button>
+  <button data-v="list"><span data-i="list"></span>Movimentos</button>
+  <button data-v="sum"><span data-i="chart"></span>Resumo</button>
+  <button data-v="wal"><span data-i="wallet"></span>Carteira</button>
 </nav>
 
 <dialog id="dlg"><h2 id="dlgTitle"></h2><p class="hint" id="dlgHint"></p><div id="dlgBody"></div>
@@ -363,7 +422,34 @@ const daysIn = m => { const [y,mo] = m.split("-").map(Number); return new Date(y
 const monthTx = m => db.tx.filter(t => ym(t.date) === m);
 const sumType = (list, tp) => list.filter(t => t.type === tp).reduce((a,t) => a + t.cents, 0);
 const catSpent = (cat, m) => db.tx.filter(t => t.type==="D" && t.cat===cat && ym(t.date)===m).reduce((a,t)=>a+t.cents,0);
-const PALETTE = ["#4c8dff","#38c98a","#f5a524","#ff6161","#a78bfa","#22c3d6","#f472b6","#84cc16","#fb923c","#94a3b8","#eab308","#14b8a6"];
+// cor fixa de cada categoria (pela posição na lista do seu tipo): a mesma no Resumo, nos movimentos e nas definições
+const CAT_COLORS = ["#5e8ee8","#3fb68b","#e0a43a","#e06a5e","#9b84d6","#3aa7bb","#d27aa6","#8daf4a","#de8a4e","#8e99a8","#c4ae3c","#56a39a"];
+function catColor(c){
+  if (!c || !c.id) return "var(--muted)";
+  const i = db.cats.filter(x => x.type === c.type).findIndex(x => x.id === c.id);
+  return i < 0 ? "var(--muted)" : CAT_COLORS[i % CAT_COLORS.length];
+}
+const dot = c => `<i class="dot" style="background:${catColor(c)}"></i>`;
+/* Ícones (traço 1.5, desenhos do conjunto Lucide, ISC) */
+const ICONS = {
+  receipt:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M13 16H8"/>',
+  cash:'<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+  list:'<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+  chart:'<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+  gear:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  left:'<path d="m15 18-6-6 6-6"/>',
+  right:'<path d="m9 18 6-6-6-6"/>',
+  swap:'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+  zap:'<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
+  save:'<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>'
+};
+const icon = n => `<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+$$("[data-i]").forEach(e => e.outerHTML = icon(e.dataset.i));
 
 /* ---------- Diálogo genérico ---------- */
 // fields: [{k, label, type:"text"|"money"|"select"|"date"|"number"|"emoji", value, options:[[v,label]], ph}]
@@ -399,7 +485,7 @@ function ask(title, fields, opt = {}){
     d.showModal();
   });
 }
-const catOptions = tp => db.cats.filter(c => c.type===tp).map(c => [c.id, `${c.emoji} ${c.name}`]);
+const catOptions = tp => db.cats.filter(c => c.type===tp).map(c => [c.id, c.name]);
 const methodOptions = () => db.methods.map(m => [m,m]);
 
 /* ================= Navegação ================= */
@@ -411,7 +497,8 @@ function show(v){
   $("#v-"+v).classList.remove("hidden");
   $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
   $("#title").textContent = editingId && v==="add" ? "Editar despesa" : iEditId && v==="inc" ? "Editar entrada" : TITLES[v];
-  $("#gear").textContent = v === "set" ? "✕" : "⚙️";
+  $("#gear").innerHTML = icon(v === "set" ? "x" : "gear");
+  $("#gear").setAttribute("aria-label", v === "set" ? "Fechar definições" : "Definições");
   render();
   window.scrollTo(0,0);
 }
@@ -447,12 +534,12 @@ function renderBanners(){
   let html = "";
   for (const p of db.pending) {
     const c = catById(p.cat) || NOCAT; const [,m,d] = p.date.split("-");
-    html += `<div class="banner"><span>🔁</span><div class="t"><b>${esc(p.type==="R" ? p.source||c.name : p.note||c.name)}</b> · ${p.type==="R"?"+":"−"}${money(p.cents)}<br><small class="hint">${+d}/${m} · recorrente por confirmar</small></div>
-      <button class="ok" data-pok="${p.id}">✓</button><button data-pno="${p.id}">✕</button></div>`;
+    html += `<div class="banner">${icon("repeat")}<div class="t"><div>${esc(p.type==="R" ? p.source||c.name : p.note||c.name)} · <span class="num">${p.type==="R"?"+":"−"}${money(p.cents)}</span></div><small>${+d}/${m} · recorrente por confirmar</small></div>
+      <button class="ok" data-pok="${p.id}" aria-label="Confirmar">${icon("check")}</button><button class="no" data-pno="${p.id}" aria-label="Ignorar este mês">${icon("x")}</button></div>`;
   }
   const days = Math.floor((Date.now() - (db.lastBackup || db.since)) / 864e5);
   if (db.tx.length >= 5 && days >= 30)
-    html += `<div class="banner warn"><span>💾</span><div class="t">${db.lastBackup ? `Já passaram ${days} dias desde a última cópia de segurança.` : "Ainda não fizeste nenhuma cópia de segurança."}</div><button id="bkNow">Fazer agora</button></div>`;
+    html += `<div class="banner">${icon("save")}<div class="t">${db.lastBackup ? `Já passaram ${days} dias desde a última cópia de segurança` : "Ainda não fizeste nenhuma cópia de segurança"}</div><button id="bkNow">Fazer agora</button></div>`;
   box.innerHTML = html;
   $$("[data-pok]").forEach(b => b.onclick = () => {
     const p = db.pending.find(x => x.id === b.dataset.pok); db.pending = db.pending.filter(x => x !== p);
@@ -481,7 +568,7 @@ async function editRecurring(r, preset){
     // se o dia deste mês já passou (ou é hoje), assume que este mês já foi registado
     const last = out.day <= +today.slice(8) ? m : shiftMonth(m, -1);
     db.recurring.push({id: uid(), type: tp, from: m, last, active: true, ...data});
-    toast("Recorrente criado — próximo: dia " + out.day);
+    toast("Recorrente criado, próximo no dia " + out.day);
   } else Object.assign(r, data);
   save(); render();
 }
@@ -492,21 +579,21 @@ function budgetAlert(t){
   if (t.type !== "D") return;
   const c = catById(t.cat); if (!c || !c.budget) return;
   const after = catSpent(t.cat, ym(t.date)), before = after - t.cents, b = c.budget;
-  if (before <= b && after > b) { toast(`🚨 ${c.name}: passaste o orçamento (${money(after)} de ${money(b)})`, {ms:4000}); budgetAlert._shown = true; }
-  else if (before < .8*b && after >= .8*b) { toast(`⚠️ ${c.name}: já usaste ${Math.round(after/b*100)}% do orçamento`, {ms:4000}); budgetAlert._shown = true; }
+  if (before <= b && after > b) { toast(`${c.name}: passaste o orçamento (${money(after)} de ${money(b)})`, {ms:4000}); budgetAlert._shown = true; }
+  else if (before < .8*b && after >= .8*b) { toast(`${c.name}: já usaste ${Math.round(after/b*100)}% do orçamento`, {ms:4000}); budgetAlert._shown = true; }
 }
 
 /* ================= Despesa ================= */
 let fCat = null, editingId = null, iEditId = null;
 function renderForm(){
   $("#quick").innerHTML = db.quick.map(q => { const c = catById(q.cat) || NOCAT;
-    return `<button data-q="${q.id}">${esc(c.emoji)} ${esc(q.label)}<b>${money(q.cents)}</b></button>`; }).join("");
+    return `<button data-q="${q.id}">${dot(c)}${esc(q.label)}<span class="num">${money(q.cents)}</span></button>`; }).join("");
   $("#quick").classList.toggle("hidden", !db.quick.length || !!editingId);
   $$("#quick button").forEach(b => b.onclick = () => useQuick(b.dataset.q));
   const cats = db.cats.filter(c => c.type === "D");
   if (fCat && !cats.some(c=>c.id===fCat)) fCat = null;
   $("#catChips").innerHTML = cats.map(c =>
-    `<button class="chip ${c.id===fCat?"on":""}" data-id="${c.id}"><span class="e">${esc(c.emoji)}</span>${esc(c.name)}</button>`).join("");
+    `<button class="chip ${c.id===fCat?"on":""}" data-id="${c.id}">${dot(c)}<span>${esc(c.name)}</span></button>`).join("");
   $$("#catChips .chip").forEach(b => b.onclick = () => { fCat = b.dataset.id; renderForm(); });
   fillMethods($("#method"));
   if (!$("#date").value) $("#date").value = todayISO();
@@ -556,7 +643,7 @@ $("#mkQuick").onclick = async () => {
       validate: o => !o.label ? "Dá um nome ao atalho" : !o.cents ? "Escreve um valor" : null});
   if (!out || out === "delete") return;
   db.quick.push({id: uid(), label: out.label, cents: out.cents, cat: out.cat, method: out.method, note: out.label});
-  save(); resetForm(); renderForm(); toast("Atalho criado — está no topo");
+  save(); resetForm(); renderForm(); toast("Atalho criado, está no topo");
 };
 $("#mkRecD").onclick = () => editRecurring(null, {type:"D", cents: parseCents($("#amount").value) || 0, cat: fCat, method: $("#method").value, note: $("#note").value.trim()});
 $("#cancelEdit").onclick = () => { resetForm(); show("list"); };
@@ -584,7 +671,7 @@ function sources(){
 function renderInc(){
   const src = sources();
   $("#srcList").innerHTML = src.map(x => `<option value="${esc(x)}">`).join("");
-  $("#srcQuick").innerHTML = src.slice(0,6).map(x => `<button class="chip" data-src="${esc(x)}">${esc(x)}</button>`).join("");
+  $("#srcQuick").innerHTML = src.slice(0,6).map(x => `<button class="chip src" data-src="${esc(x)}">${esc(x)}</button>`).join("");
   $$("#srcQuick .chip").forEach(b => b.onclick = () => {
     $("#iSource").value = b.dataset.src;
     const last = [...db.tx].reverse().find(t => t.type==="R" && t.source===b.dataset.src);
@@ -594,7 +681,7 @@ function renderInc(){
   const cats = db.cats.filter(c => c.type === "R");
   if (iCat && !cats.some(c=>c.id===iCat)) iCat = null;
   $("#iCatChips").innerHTML = cats.map(c =>
-    `<button class="chip ${c.id===iCat?"on":""}" data-id="${c.id}"><span class="e">${esc(c.emoji)}</span>${esc(c.name)}</button>`).join("");
+    `<button class="chip ${c.id===iCat?"on":""}" data-id="${c.id}">${dot(c)}<span>${esc(c.name)}</span></button>`).join("");
   $$("#iCatChips .chip").forEach(b => b.onclick = () => { iCat = b.dataset.id; renderInc(); });
   fillMethods($("#iMethod"), db.methods.find(m => /transf/i.test(m)) || db.methods[0]);
   if (!$("#iDate").value) $("#iDate").value = todayISO();
@@ -607,13 +694,13 @@ function renderInc(){
   list.forEach(t => { const k = t.source || "(sem fonte)"; (by[k] = by[k] || {s:0, n:0}); by[k].s += t.cents; by[k].n++; });
   const tot = list.reduce((a,t)=>a+t.cents,0);
   const entries = Object.entries(by).sort((a,b)=>b[1].s-a[1].s);
-  $("#srcSum").innerHTML = !entries.length ? `<div class="empty">Sem entradas neste mês.</div>` :
-    `<div class="catline"><div class="top"><b>Total do mês</b><b class="pos">${money(tot)}</b></div></div>` +
-    entries.map(([k,v]) => `<div class="catline"><div class="top"><span>${esc(k)} <small>· ${v.n}×</small></span><b>${money(v.s)}</b></div>
-      <div class="bar"><i style="width:${v.s/tot*100}%;background:var(--green)"></i></div><small>${Math.round(v.s/tot*100)}% das entradas</small></div>`).join("") +
-    `<div style="margin-top:10px">` + [...list].sort((a,b)=>b.date.localeCompare(a.date)).map(t => {
+  $("#srcSum").innerHTML = !entries.length ? `<div class="empty">Sem entradas neste mês</div>` :
+    entries.map(([k,v]) => `<div class="catline"><div class="top"><span>${esc(k)} <small class="num">${v.n}×</small></span><span class="v">${money(v.s)}</span></div>
+      <div class="bar"><i style="width:${v.s/tot*100}%"></i></div><small>${Math.round(v.s/tot*100)}% das entradas</small></div>`).join("") +
+    `<div class="catline total"><div class="top"><span>Total do mês</span><span class="v pos">${money(tot)}</span></div></div>` +
+    `<div style="margin-top:12px">` + [...list].sort((a,b)=>b.date.localeCompare(a.date)).map(t => {
       const c = catById(t.cat) || NOCAT; const [,m,d] = t.date.split("-");
-      return `<div class="tx" data-id="${t.id}"><div class="e">${esc(c.emoji)}</div><div class="t"><div>${esc(t.source||c.name)}</div>
+      return `<div class="tx" data-id="${t.id}">${dot(c)}<div class="t"><div>${esc(t.source||c.name)}</div>
         <small>${+d}/${m} · ${esc(c.name)}${t.note?" · "+esc(t.note):""}</small></div><div class="v pos">+${money(t.cents)}</div></div>`;}).join("") + `</div>`;
   $$("#srcSum .tx").forEach(e => e.onclick = () => iEdit(db.tx.find(t => t.id === e.dataset.id)));
 }
@@ -659,26 +746,27 @@ function renderList(){
   const q = $("#search").value.trim().toLowerCase();
   if (q) list = list.filter(t => ((t.note||"")+" "+(t.source||"")+" "+(catById(t.cat)?.name||"")+" "+t.method+" "+(t.to||"")).toLowerCase().includes(q));
   list.sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
-  if (!list.length) { $("#txList").innerHTML = `<div class="empty">Sem movimentos ${q?"para esta pesquisa":"neste mês"}.</div>`; return; }
+  if (!list.length) { $("#txList").innerHTML = `<div class="empty">Sem movimentos ${q?"para esta pesquisa":"neste mês"}</div>`; return; }
   let html = "", lastDay = null;
   const days = {};
   list.forEach(t => { if (t.type==="D") days[t.date] = (days[t.date]||0) + t.cents; });
   for (const t of list) {
     if (t.date !== lastDay) {
+      if (lastDay) html += `</div>`;
       lastDay = t.date; const [y,m,d] = t.date.split("-").map(Number);
       const wd = new Date(y,m-1,d).toLocaleDateString("pt-PT",{weekday:"long"});
-      html += `<div class="day"><span>${wd}, ${d} ${MSHORT[m-1]}</span><span>${days[t.date]?"−"+money(days[t.date]):""}</span></div>`;
+      html += `<div class="day"><span>${wd}, ${d} ${MSHORT[m-1]}</span><span class="num">${days[t.date]?"−"+money(days[t.date]):""}</span></div><div class="group">`;
     }
     if (t.type === "T") {
-      html += `<div class="tx" data-id="${t.id}"><div class="e">↔️</div><div class="t"><div>${esc(t.method)} → ${esc(t.to)}</div><small>Transferência${t.note?" · "+esc(t.note):""}</small></div><div class="v">${money(t.cents)}</div></div>`;
+      html += `<div class="tx" data-id="${t.id}"><i class="dot hollow"></i><div class="t"><div>${esc(t.method)} → ${esc(t.to)}</div><small>Transferência${t.note?" · "+esc(t.note):""}</small></div><div class="v">${money(t.cents)}</div></div>`;
       continue;
     }
     const c = catById(t.cat) || NOCAT;
-    html += `<div class="tx" data-id="${t.id}"><div class="e">${esc(c.emoji)}</div>
+    html += `<div class="tx" data-id="${t.id}">${dot(c)}
       <div class="t"><div>${esc(t.type==="R" ? (t.source || t.note || c.name) : (t.note || c.name))}</div><small>${esc(t.type==="R" ? c.name+(t.note?" · "+t.note:"") : (t.note ? c.name+" · " : "")+t.method)}</small></div>
       <div class="v ${t.type==="D"?"neg":"pos"}">${t.type==="D"?"−":"+"}${money(t.cents)}</div></div>`;
   }
-  $("#txList").innerHTML = html;
+  $("#txList").innerHTML = html + `</div>`;
   $$("#txList .tx").forEach(e => e.onclick = () => editTx(e.dataset.id));
 }
 
@@ -706,43 +794,42 @@ function renderSum(){
     const proj = Math.round(totSpent / day * dim) + pendingRec;
     let extra = "";
     const prevTot = sumType(prev,"D");
-    if (prevTot) extra += `<br><small class="hint">Em ${MONTHS[+prevM.slice(5)-1]} gastaste ${money(prevTot)}.</small>`;
-    fc.innerHTML = `<small class="hint">Previsão para o fim do mês (ao ritmo atual)</small><b>~${money(proj)}</b><small class="hint">Gastaste ${money(totSpent)} em ${day} de ${dim} dias${pendingRec?` · inclui ${money(pendingRec)} de recorrentes ainda por vir`:""}.</small>${extra}`;
+    if (prevTot) extra += ` Em ${MONTHS[+prevM.slice(5)-1]} gastaste ${money(prevTot)}.`;
+    fc.innerHTML = `<small class="lbl">Previsão para o fim do mês, ao ritmo atual</small><b>~${money(proj)}</b><p>Gastaste ${money(totSpent)} em ${day} de ${dim} dias${pendingRec?`, inclui ${money(pendingRec)} de recorrentes ainda por vir`:""}.${extra}</p>`;
     fc.classList.remove("hidden");
   } else fc.classList.add("hidden");
 
   // donut
   const withSpend = rows.filter(r => r.s);
-  if (!withSpend.length) $("#donut").innerHTML = `<div class="empty" style="padding:20px">Ainda não há despesas neste mês.</div>`;
+  if (!withSpend.length) $("#donut").innerHTML = `<div class="empty" style="padding:20px">Ainda não há despesas neste mês</div>`;
   else {
-    let acc = 0; const segs = [];
     const top = withSpend.slice(0, 7), rest = withSpend.slice(7).reduce((a,r)=>a+r.s,0);
-    const parts = top.map((r,i) => ({label:`${r.c.emoji} ${r.c.name}`, s:r.s, col:PALETTE[i]}));
-    if (rest) parts.push({label:"Restantes", s:rest, col:PALETTE[9]});
-    for (const p of parts) { const a0 = acc/totSpent*360; acc += p.s; segs.push(`${p.col} ${a0}deg ${acc/totSpent*360}deg`); }
-    $("#donut").innerHTML = `<div class="donutwrap"><div class="donut" style="background:conic-gradient(${segs.join(",")})"></div>
-      <div class="legend">${parts.map(p => `<div><i style="background:${p.col}"></i>${esc(p.label)}<span>${Math.round(p.s/totSpent*100)}%</span></div>`).join("")}</div></div>`;
+    const parts = top.map(r => ({label:r.c.name, s:r.s, col:catColor(r.c)}));
+    if (rest) parts.push({label:"Restantes", s:rest, col:"var(--bar)"});
+    $("#donut").innerHTML = `<div class="stack">${parts.map(p => `<i style="flex:${p.s};background:${p.col}"></i>`).join("")}</div>
+      <div class="legend">${parts.map(p => `<div><i class="dot" style="background:${p.col}"></i><span>${esc(p.label)}</span><span class="num">${Math.round(p.s/totSpent*100)}%</span></div>`).join("")}</div>`;
   }
 
   // categorias
   let html = "";
   if (totBudget) {
     const p = totBSpent/totBudget;
-    html += `<div class="catline"><div class="top"><b>Categorias com orçamento</b><span>${money(totBSpent)} <small>/ ${money(totBudget)}</small></span></div>
-      <div class="bar"><i class="${p>1?"over":""}" style="width:${Math.min(100,p*100)}%"></i></div>
+    html += `<div class="catline lead"><div class="top"><span>Categorias com orçamento</span><span><span class="v">${money(totBSpent)}</span> <small class="num">/ ${money(totBudget)}</small></span></div>
+      <div class="bar"><i class="${p>1?"over":p>=.8?"warn":"acc"}" style="width:${Math.min(100,p*100)}%"></i></div>
       <small>${p>1?"Excedeste o orçamento em "+money(totBSpent-totBudget):"Restam "+money(totBudget-totBSpent)}</small></div>`;
   }
   const max = Math.max(1, ...rows.map(r=>r.s));
   const shown = rows.filter(r => r.s || r.c.budget || prevSpent[r.id]);
-  if (!shown.length) html += `<div class="empty">Ainda não há despesas neste mês.</div>`;
+  if (!shown.length) html += `<div class="empty">Ainda não há despesas neste mês</div>`;
   for (const {id,c,s} of shown) {
     const b = c.budget||0, p = b ? s/b : s/max, ps = prevSpent[id] || 0;
     let delta = "";
-    if (ps) { const d = Math.round((s-ps)/ps*100); delta = d === 0 ? `<span class="delta hint">= ${mshort(prevM)}</span>` : `<span class="delta ${d>0?"up":"down"}">${d>0?"▲":"▼"}${Math.abs(d)}% vs ${mshort(prevM)}</span>`; }
+    if (ps) { const d = Math.round((s-ps)/ps*100); delta = d === 0 ? `<span class="delta hint">= ${mshort(prevM)}</span>` : `<span class="delta ${d>0?"up":"down"}">${d>0?"▲":"▼"} ${Math.abs(d)}% vs ${mshort(prevM)}</span>`; }
     else if (s) delta = `<span class="delta hint">novo</span>`;
-    html += `<div class="catline"><div class="top"><span>${esc(c.emoji)} ${esc(c.name)}</span>
-      <span><b>${money(s)}</b>${b?` <small>/ ${money(b)}</small>`:""}</span></div>
-      <div class="bar"><i class="${b&&p>1?"over":""}" style="width:${Math.min(100,p*100)}%"></i></div>
+    const cls = b ? (p>1 ? "over" : p>=.8 ? "warn" : "acc") : "";
+    html += `<div class="catline"><div class="top"><span>${dot(c)}${esc(c.name)}</span>
+      <span><span class="v">${money(s)}</span>${b?` <small class="num">/ ${money(b)}</small>`:""}</span></div>
+      <div class="bar"><i class="${cls}" style="width:${Math.min(100,p*100)}%"></i></div>
       <small class="${b&&p>1?"neg":""}">${b ? (p>1?"+"+money(s-b)+" acima":Math.round(p*100)+"% usado") : ""}</small>${delta}</div>`;
   }
   $("#catSum").innerHTML = html;
@@ -752,8 +839,8 @@ function renderSum(){
   const vals = months.map(m => sumType(monthTx(m),"D"));
   const hm = Math.max(1, ...vals);
   $("#hist").innerHTML = months.map((m,i) => `<div class="${m===curMonth?"cur":""}">
-      <span style="font-size:10px">${vals[i]?Math.round(vals[i]/100)+"€":""}</span>
-      <span class="b" style="height:${vals[i]/hm*80}%"></span>${mshort(m)}</div>`).join("");
+      <span>${vals[i]?Math.round(vals[i]/100)+" €":""}</span>
+      <span class="b" style="height:${vals[i]/hm*76}%"></span>${mshort(m)}</div>`).join("");
 
   // saldo acumulado no ano
   const y = curMonth.slice(0,4);
@@ -761,17 +848,17 @@ function renderSum(){
   let cum = 0; const pts = [];
   const lastM = y === todayISO().slice(0,4) ? +todayISO().slice(5,7) : 12;
   for (let mo = 1; mo <= lastM; mo++) { const l = monthTx(`${y}-${pad(mo)}`); cum += sumType(l,"R") - sumType(l,"D"); pts.push(cum); }
-  if (!db.tx.some(t => t.date.startsWith(y))) { $("#balLine").innerHTML = `<div class="empty" style="padding:20px">Sem movimentos em ${y}.</div>`; return; }
+  if (!db.tx.some(t => t.date.startsWith(y))) { $("#balLine").innerHTML = `<div class="empty" style="padding:20px">Sem movimentos em ${y}</div>`; return; }
   const W = 320, H = 110, lo = Math.min(0, ...pts), hi = Math.max(1, ...pts);
   const X = i => 10 + i * (W-20) / 11, Y = v => 8 + (hi - v) / (hi - lo || 1) * (H - 16);
   const poly = pts.map((v,i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" ");
   const last = pts[pts.length-1];
   $("#balLine").innerHTML = `<svg class="line" viewBox="0 0 ${W} ${H+18}">
     <line x1="10" x2="${W-10}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line)" stroke-dasharray="3 3"/>
-    <polyline points="${poly}" fill="none" stroke="${last<0?"var(--red)":"var(--green)"}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-    ${pts.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="${v<0?"var(--red)":"var(--green)"}"/>`).join("")}
-    ${MSHORT.map((m,i)=>`<text x="${X(i)}" y="${H+14}" text-anchor="middle">${m}</text>`).join("")}
-    <text x="${X(pts.length-1)}" y="${Y(last)-8}" text-anchor="middle" style="fill:var(--text);font-weight:600">${Math.round(last/100)}€</text>
+    <polyline points="${poly}" fill="none" stroke="${last<0?"var(--red)":"var(--green)"}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(pts.length-1)}" cy="${Y(last)}" r="3.5" fill="${last<0?"var(--red)":"var(--green)"}" stroke="var(--card)" stroke-width="2"/>
+    ${MSHORT.map((m,i)=>`<text x="${X(i)}" y="${H+14}" text-anchor="middle" ${i===pts.length-1?'style="fill:var(--text)"':""}>${m}</text>`).join("")}
+    <text x="${X(pts.length-1)}" y="${Y(last)-10}" text-anchor="middle" style="fill:var(--text);font-size:11px">${Math.round(last/100)} €</text>
   </svg>`;
 }
 
@@ -789,17 +876,17 @@ function balances(){
 function renderWallet(){
   const b = balances(), tot = Object.values(b).reduce((a,v)=>a+v,0);
   $("#accounts").innerHTML = Object.entries(b).map(([m,v]) => `<div class="item"><div class="t">${esc(m)}</div><div class="v ${v<0?"neg":""}">${money(v)}</div></div>`).join("")
-    + `<div class="item"><div class="t"><b>Total</b></div><div class="v ${tot<0?"neg":""}">${money(tot)}</div></div>`
+    + `<div class="item total"><div class="t">Total</div><div class="v ${tot<0?"neg":""}">${money(tot)}</div></div>`
     + (Object.keys(db.accInit).length ? "" : `<p class="hint">Define os saldos iniciais para os valores baterem certo com o banco.</p>`);
-  $("#goals").innerHTML = !db.goals.length ? `<p class="hint">Ex.: "Monitor ultrawide — 300 €". Vais pondo dinheiro de parte e vês o progresso.</p>` :
+  $("#goals").innerHTML = !db.goals.length ? `<p class="hint">Ex.: "Monitor ultrawide, 300 €". Vais pondo dinheiro de parte e vês o progresso.</p>` :
     db.goals.map(g => { const p = g.target ? Math.min(1, g.saved/g.target) : 0;
-      return `<div class="item" data-goal="${g.id}"><div class="e">${esc(g.emoji)}</div><div class="t"><div>${esc(g.name)}</div>
-        <div class="bar"><i style="width:${p*100}%;background:var(--green)"></i></div>
-        <small>${money(g.saved)} de ${money(g.target)} · ${p>=1?"🎉 Concluída!":"faltam "+money(g.target-g.saved)}</small></div></div>`; }).join("");
+      return `<div class="item" data-goal="${g.id}"><div class="t"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(g.name)}</span><span class="v">${Math.round(p*100)}%</span></div>
+        <div class="bar"><i class="acc" style="width:${p*100}%"></i></div>
+        <small>${money(g.saved)} de ${money(g.target)} · ${p>=1?"concluída":"faltam "+money(g.target-g.saved)}</small></div></div>`; }).join("");
   $$("[data-goal]").forEach(e => e.onclick = () => goalMenu(db.goals.find(g => g.id === e.dataset.goal)));
   const owed = db.debts.filter(d => d.dir === "owed"), owe = db.debts.filter(d => d.dir === "owe");
   const sec = (title, arr, cls) => arr.length ? `<label>${title} · ${money(arr.reduce((a,d)=>a+d.cents,0))}</label>` + arr.map(d => { const [,m,dd] = d.date.split("-");
-    return `<div class="item" data-debt="${d.id}"><div class="e">${d.dir==="owed"?"🫴":"🤝"}</div><div class="t"><div>${esc(d.person)}</div><small>${+dd}/${m}${d.note?" · "+esc(d.note):""}</small></div><div class="v ${cls}">${money(d.cents)}</div></div>`; }).join("") : "";
+    return `<div class="item" data-debt="${d.id}"><div class="t"><div>${esc(d.person)}</div><small>${+dd}/${m}${d.note?" · "+esc(d.note):""}</small></div><div class="v ${cls}">${money(d.cents)}</div></div>`; }).join("") : "";
   $("#debts").innerHTML = (!db.debts.length ? `<p class="hint">Ex.: "Rui deve-me 12 € do jantar". Toca numa dívida quando for paga.</p>` : "") + sec("Devem-me", owed, "pos") + sec("Eu devo", owe, "neg");
   $$("[data-debt]").forEach(e => e.onclick = () => editDebt(db.debts.find(d => d.id === e.dataset.debt)));
 }
@@ -812,7 +899,7 @@ async function editTransfer(t){
     {k:"cents", label:"Valor (€)", type:"money", value: t ? t.cents : ""},
     {k:"date", label:"Data", type:"date", value: t ? t.date : todayISO()},
     {k:"note", label:"Nota (opcional)", value: t ? t.note : "", ph:"ex.: levantamento multibanco"},
-  ], {hint:"Não conta como despesa nem entrada — só move dinheiro entre contas.", del: t ? "Apagar transferência" : null,
+  ], {hint:"Não conta como despesa nem entrada, só move dinheiro entre contas.", del: t ? "Apagar transferência" : null,
       validate: o => !o.cents ? "Escreve um valor" : o.from === o.to ? "Escolhe contas diferentes" : null});
   if (!out) return;
   if (out === "delete") db.tx = db.tx.filter(x => x !== t);
@@ -829,28 +916,27 @@ $("#setInit").onclick = async () => {
 };
 async function editGoal(g){
   const out = await ask(g ? "Editar meta" : "Nova meta", [
-    {k:"emoji", label:"Emoji", type:"emoji", value: g ? g.emoji : "🎯"},
     {k:"name", label:"Nome", value: g ? g.name : "", ph:"ex.: Monitor ultrawide"},
     {k:"target", label:"Objetivo (€)", type:"money", value: g ? g.target : ""},
     {k:"saved", label:"Já tenho (€)", type:"money", value: g ? g.saved : ""},
   ], {del: g ? "Apagar meta" : null, validate: o => !o.name ? "Dá um nome à meta" : !o.target ? "Escreve o objetivo" : null});
   if (!out) return;
   if (out === "delete") db.goals = db.goals.filter(x => x !== g);
-  else { const d = {emoji: out.emoji || "🎯", name: out.name, target: out.target, saved: out.saved || 0};
+  else { const d = {emoji: (g && g.emoji) || "🎯", name: out.name, target: out.target, saved: out.saved || 0};
     if (g) Object.assign(g, d); else db.goals.push({id: uid(), ...d}); }
   save(); render();
 }
 $("#newGoal").onclick = () => editGoal(null);
 async function goalMenu(g){
-  const out = await ask(`${g.emoji} ${g.name}`, [
-    {k:"op", label:"Operação", type:"select", options:[["add","➕ Pôr de parte"],["sub","➖ Retirar"]], value:"add"},
+  const out = await ask(g.name, [
+    {k:"op", label:"Operação", type:"select", options:[["add","Pôr de parte"],["sub","Retirar"]], value:"add"},
     {k:"cents", label:"Valor (€)", type:"money"},
   ], {ok:"Confirmar", del:"Editar / apagar meta", hint:`${money(g.saved)} de ${money(g.target)}`});
   if (!out) return;
   if (out === "delete") { editGoal(g); return; }
   if (!out.cents) return;
   g.saved = Math.max(0, g.saved + (out.op === "add" ? out.cents : -out.cents));
-  save(); render(); toast(g.saved >= g.target ? "🎉 Meta atingida!" : `Faltam ${money(g.target - g.saved)}`);
+  save(); render(); toast(g.saved >= g.target ? "Meta atingida" : `Faltam ${money(g.target - g.saved)}`);
 }
 async function editDebt(d){
   const out = await ask(d ? "Dívida" : "Nova dívida", [
@@ -859,7 +945,7 @@ async function editDebt(d){
     {k:"cents", label:"Valor (€)", type:"money", value: d ? d.cents : ""},
     {k:"note", label:"Motivo (opcional)", value: d ? d.note : "", ph:"ex.: jantar de sexta"},
     {k:"date", label:"Data", type:"date", value: d ? d.date : todayISO()},
-  ], {del: d ? "✓ Paga — remover" : null, validate: o => !o.person ? "Escreve o nome" : !o.cents ? "Escreve um valor" : null});
+  ], {del: d ? "Paga, remover" : null, validate: o => !o.person ? "Escreve o nome" : !o.cents ? "Escreve um valor" : null});
   if (!out) return;
   if (out === "delete") { db.debts = db.debts.filter(x => x !== d); toast("Dívida saldada"); }
   else { const r = {dir: out.dir, person: out.person, cents: out.cents, note: out.note, date: out.date || todayISO()};
@@ -872,18 +958,18 @@ $("#newDebt").onclick = () => editDebt(null);
 function renderSet(){
   for (const tp of ["D","R"]) {
     $("#cats"+tp).innerHTML = db.cats.filter(c=>c.type===tp).map(c => `<div class="setcat">
-      <span class="e">${esc(c.emoji)}</span><div class="n">${esc(c.name)}${tp==="D"?`<br><small>${c.budget?"Orçamento: "+money(c.budget):"Sem orçamento"}</small>`:""}</div>
+      ${dot(c)}<div class="n">${esc(c.name)}${tp==="D"?`<br><small>${c.budget?"Orçamento: "+money(c.budget):"Sem orçamento"}</small>`:""}</div>
       <button data-edit="${c.id}">Editar</button></div>`).join("");
   }
   $$("[data-edit]").forEach(b => b.onclick = () => editCat(catById(b.dataset.edit)));
   $("#recList").innerHTML = (db.recurring.map(r => { const c = catById(r.cat) || NOCAT;
-    return `<div class="setcat"><span class="e">${esc(c.emoji)}</span><div class="n">${esc(r.type==="R" ? r.source : r.note || c.name)}<br><small>${r.type==="R"?"+":"−"}${money(r.cents)} · dia ${r.day} de cada mês</small></div><button data-rec="${r.id}">Editar</button></div>`; }).join("")
-    || `<p class="hint">Ainda não tens. Cria em "Nova despesa" ou "Entradas" → 🔁 Tornar recorrente.</p>`)
+    return `<div class="setcat">${dot(c)}<div class="n">${esc(r.type==="R" ? r.source : r.note || c.name)}<br><small><span class="num">${r.type==="R"?"+":"−"}${money(r.cents)}</span> · dia ${r.day} de cada mês</small></div><button data-rec="${r.id}">Editar</button></div>`; }).join("")
+    || `<p class="hint">Ainda não tens. Cria em Nova despesa ou Entradas → Recorrente.</p>`)
     + `<div class="row2"><button class="btn sec small" data-newrec="D">+ Despesa recorrente</button><button class="btn sec small" data-newrec="R">+ Entrada recorrente</button></div>`;
   $$("[data-rec]").forEach(b => b.onclick = () => editRecurring(db.recurring.find(r => r.id === b.dataset.rec)));
   $$("[data-newrec]").forEach(b => b.onclick = () => editRecurring(null, {type:b.dataset.newrec, cents:0, cat:null, method:db.methods[0], note:"", source:""}));
   $("#quickList").innerHTML = db.quick.map(q => { const c = catById(q.cat) || NOCAT;
-    return `<div class="setcat"><span class="e">${esc(c.emoji)}</span><div class="n">${esc(q.label)}<br><small>${money(q.cents)} · ${esc(q.method)}</small></div><button data-qdel="${q.id}">Apagar</button></div>`; }).join("");
+    return `<div class="setcat">${dot(c)}<div class="n">${esc(q.label)}<br><small><span class="num">${money(q.cents)}</span> · ${esc(q.method)}</small></div><button data-qdel="${q.id}">Apagar</button></div>`; }).join("");
   $$("[data-qdel]").forEach(b => b.onclick = () => { db.quick = db.quick.filter(q => q.id !== b.dataset.qdel); save(); renderSet(); });
   $("#methodsInput").value = db.methods.join(", ");
   const kb = Math.max(1, Math.round((localStorage.getItem(KEY)||"").length / 1024));
@@ -895,8 +981,8 @@ function renderSet(){
 $$("[data-addcat]").forEach(b => b.onclick = () => editCat(null, b.dataset.addcat));
 async function editCat(c, tp){
   tp = c ? c.type : tp;
-  const fields = [{k:"emoji", label:"Emoji", type:"emoji", value: c ? c.emoji : "🏷️"}, {k:"name", label:"Nome", value: c ? c.name : ""}];
-  if (tp === "D") fields.push({k:"budget", label:"Orçamento mensal (€) — vazio = sem orçamento", type:"money", value: c ? c.budget : ""});
+  const fields = [{k:"name", label:"Nome", value: c ? c.name : ""}];
+  if (tp === "D") fields.push({k:"budget", label:"Orçamento mensal (€), vazio = sem orçamento", type:"money", value: c ? c.budget : ""});
   const out = await ask(c ? "Editar categoria" : "Nova categoria", fields, {del: c ? "Apagar categoria" : null, validate: o => !o.name ? "Escreve um nome" : null});
   if (!out) return;
   if (out === "delete") {
@@ -904,7 +990,7 @@ async function editCat(c, tp){
     if (!confirm(n ? `Esta categoria tem ${n} movimentos. Vão ficar como "Sem categoria". Apagar?` : "Apagar categoria?")) return;
     db.cats = db.cats.filter(x => x !== c);
   } else {
-    const d = {emoji: out.emoji || "🏷️", name: out.name, budget: tp==="D" && out.budget ? out.budget : 0};
+    const d = {emoji: (c && c.emoji) || "🏷️", name: out.name, budget: tp==="D" && out.budget ? out.budget : 0};
     if (c) Object.assign(c, d); else db.cats.push({id: uid(), type: tp, ...d});
   }
   save(); renderSet();
