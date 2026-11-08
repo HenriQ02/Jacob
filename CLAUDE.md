@@ -1,6 +1,6 @@
 # Jacob — app pessoal de controlo de gastos
 
-PWA (web app instalável) para Android do Henrique. Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
+PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (Partilhar → Adicionar ao ecrã principal). Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
 
 ## Regras do projeto
 - **Manter a app leve**: sem frameworks, sem bibliotecas externas, sem CDNs, sem imagens pesadas. Tudo em `index.html` (HTML + CSS + JS inline, vanilla JS).
@@ -10,10 +10,11 @@ PWA (web app instalável) para Android do Henrique. Publicada em **https://henri
 - Valores monetários guardados em **cêntimos (inteiros)**. Formatação `pt-PT`, EUR, datas `YYYY-MM-DD` internamente.
 - Textos da interface em PT-PT.
 - Testar em viewport móvel (390×844), modo claro e escuro, antes de publicar.
+- **iPhone**: campos de texto com `font-size` ≥ 16px (abaixo disso o iOS faz zoom ao tocar). A app instalada tem armazenamento separado do Safari/Brave: mudar de browser obriga a exportar e restaurar a cópia JSON. O Brave no iOS não consegue instalar; tem de ser o Safari.
 
 ## Ficheiros
 - `index.html` — app inteira
-- `manifest.json` — nome "Jacob", ícones, atalhos Android (`./?v=add`, `./?v=inc`, `./?v=sum`)
+- `manifest.json` — nome "Jacob", ícones, atalhos (`./?v=add`, `./?v=inc`, `./?v=sum`; só funcionam no Android, não no iPhone)
 - `sw.js` — service worker (rede primeiro, cache como fallback offline)
 - `icon-192.png`, `icon-512.png`, `icon-maskable.png`
 - `.nojekyll` — evita processamento Jekyll no Pages

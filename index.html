@@ -70,7 +70,8 @@ nav button:active{transform:none}
 .hidden{display:none!important}
 h2{font-size:15px; line-height:20px; font-weight:500; margin:0 0 12px}
 label{display:block; font-size:13px; line-height:16px; color:var(--muted); margin:16px 0 8px}
-input,select,textarea{width:100%; font:inherit; color:var(--text); background:var(--raised); border:1px solid transparent; border-radius:10px; padding:12px; min-height:48px}
+/* 16px no mínimo: abaixo disso o iPhone faz zoom ao tocar no campo */
+input,select,textarea{width:100%; font:inherit; font-size:16px; color:var(--text); background:var(--raised); border:1px solid transparent; border-radius:10px; padding:12px; min-height:48px}
 input::placeholder{color:var(--muted)}
 input:focus,select:focus{outline:none; border-color:var(--accent)}
 .amount{font-size:48px; line-height:1; font-weight:500; letter-spacing:-.02em; text-align:center; padding:16px 0 16px; min-height:0;
