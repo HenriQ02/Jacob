@@ -1,6 +1,6 @@
 # Jacob
 
-App pessoal de controlo de gastos (PWA). Funciona offline e os dados ficam guardados só no telemóvel.
+App pessoal para acompanhar as contas, despesas e entradas (PWA). Funciona offline e os dados ficam guardados só no telemóvel.
 
 Abrir: https://henriq02.github.io/Jacob/ 
 - **iPhone**: no Safari, Partilhar → **Adicionar ao ecrã principal**.

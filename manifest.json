@@ -1,13 +1,13 @@
 {
-  "name": "Jacob — controlo de gastos",
+  "name": "Jacob",
   "short_name": "Jacob",
-  "description": "Controlo pessoal de gastos",
+  "description": "As tuas contas, despesas e entradas",
   "lang": "pt-PT",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f5f9",
-  "theme_color": "#1f3a5f",
+  "background_color": "#f5f7fa",
+  "theme_color": "#f5f7fa",
   "icons": [
     {
       "src": "icon-192.png",

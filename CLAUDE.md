@@ -5,7 +5,7 @@ PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (
 ## Regras do projeto
 - **Manter a app leve**: sem frameworks, sem bibliotecas externas, sem CDNs, sem imagens pesadas. Tudo em `index.html` (HTML + CSS + JS inline, vanilla JS).
 - **Dados só no telemóvel**: `localStorage`, nunca enviar dados para servidores. O repositório é público mas só contém código.
-- **Funciona offline**: qualquer ficheiro novo tem de entrar na lista `FILES` do `sw.js`. Ao alterar a app, **incrementar `CACHE` em `sw.js`** (ex.: `gastos-v4` → `gastos-v5`).
+- **Funciona offline**: qualquer ficheiro novo tem de entrar na lista `FILES` do `sw.js`. Ao alterar a app, **incrementar `CACHE` em `sw.js`** (ex.: `jacob-v7` → `jacob-v8`).
 - **Nunca partir dados existentes**: alterações ao modelo de dados passam pela função `migrate()` (campos novos com valor por defeito). A chave `localStorage` continua `gastos.v1`.
 - Valores monetários guardados em **cêntimos (inteiros)**. Formatação `pt-PT`, EUR, datas `YYYY-MM-DD` internamente.
 - Textos da interface em PT-PT.
@@ -37,15 +37,18 @@ PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (
 ```
 Tema guardado à parte em `localStorage["gastos.theme"]` = `light` | `dark` | `auto`.
 
-## Ecrãs (navegação inferior) e funcionalidades
-- **Despesa** (`v-add`): valor, categoria (chips), data, conta/método, descrição. Atalhos no topo (1 toque regista, com "Anular"). Links "☆ Criar atalho" e "🔁 Recorrente". Alerta de orçamento a 80 % e ao exceder (`budgetAlert`).
-- **Entradas** (`v-inc`): valor, **fonte** (texto com sugestões das fontes usadas), tipo, data, onde entrou. Resumo do mês por fonte.
-- **Movimentos** (`v-list`): lista do mês agrupada por dia, pesquisa, tocar para editar (despesa/entrada/transferência).
-- **Resumo** (`v-sum`): KPIs com comparação vs mês anterior, previsão de fim de mês (linear + recorrentes por vir), donut por categoria (conic-gradient), categorias vs orçamento com delta %, histórico 6 meses, saldo acumulado no ano (SVG).
-- **Carteira** (`v-wal`): saldos por conta (saldo inicial + entradas − despesas ± transferências), transferências entre contas (tipo `T`, não contam como despesa/entrada), metas de poupança, dívidas (devem-me / eu devo).
-- **Definições** (`v-set`, botão ⚙️ no cabeçalho): aparência (claro/escuro/auto), recorrentes, atalhos, categorias e orçamentos, métodos/contas, cópias de segurança (JSON completo e CSV), apagar tudo.
-- Banners no topo: recorrentes por confirmar (✓/✕) e lembrete de cópia de segurança (30 dias sem exportar, ≥5 movimentos).
-- `ask(title, fields, opt)` — diálogo genérico reutilizável (tipos: text, money, select, date, number, emoji).
+## Ecrãs e navegação (estilo app de banco)
+Barra de baixo com 4 separadores: **Início · Movimentos · Resumo · Carteira**. Despesa, Entrada e Definições abrem como páginas por cima, com botão de voltar e sem barra de baixo (`body.sub`). `show(v)` troca de ecrã; `openSub(v)` abre uma página e guarda em `backTo` o separador para onde voltar; `back()` volta.
+- **Início** (`v-home`): saldo total grande (soma de `balances()`, cêntimos mais pequenos via `bigMoney()`), botão "Ver contas", linha do mês, 4 ações redondas (Despesa, Entrada, Transferir, Mais), banners e as 6 transações mais recentes. Avatar "J" no canto abre Definições; lupa abre Movimentos com pesquisa.
+- **Mais** (`#more`, folha que sobe de baixo): criar atalho, despesa/entrada recorrente, nova meta, nova dívida, Definições.
+- **Despesa** (`v-add`) / **Entrada** (`v-inc`): seletor Despesa|Entrada no topo, valor grande, atalhos (1 toque regista, com "Anular"), categoria (chips), data, conta, descrição. Guardar volta ao separador de origem. Alerta de orçamento a 80 % e ao exceder (`budgetAlert`).
+- **Movimentos** (`v-list`): mês, pesquisa, totais do mês numa linha, lista agrupada por dia. Tocar para editar.
+- **Resumo** (`v-sum`): gastos do mês em grande com comparação e previsão, entradas e saldo do mês, últimos 6 meses (gráfico principal), categorias (barra de partilha + linhas com orçamento), entradas por fonte (`renderSrc`), saldo acumulado no ano.
+- **Carteira** (`v-wal`): saldos por conta, transferências (tipo `T`), metas, dívidas.
+- **Definições** (`v-set`): aparência, recorrentes, atalhos, categorias e orçamentos, contas, cópias de segurança (JSON e CSV, ficheiros `jacob-…`), apagar tudo.
+- Linhas de movimentos: `txRow(t)` com `avatar()` (círculo com a inicial na cor da categoria, `catColor()`). Datas relativas com `relDay()` (Hoje, Ontem, 6 nov).
+- `ask(title, fields, opt)` — diálogo genérico reutilizável (tipos: text, money, select, date, number).
+- Nome visível da app: **Jacob**. As chaves `localStorage` `gastos.v1` e `gastos.theme` ficam com o nome antigo de propósito (mudá-las perdia os dados).
 
 ## Visual
 - Claro: variáveis em `:root`. Escuro **"Grafite"** (escolhido pelo utilizador): `html[data-theme="dark"]` — fundo `#121417`, cartões `#1c1f24` com contorno `#2a2f36`, destaque azul `#4c8dff`, vermelho `#ff6161` despesas, verde `#38c98a` entradas.
