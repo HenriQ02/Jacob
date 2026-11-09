@@ -29,6 +29,7 @@ if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListen
   --shadow:0 1px 2px rgba(17,24,39,.05); --nav:rgba(255,255,255,.92); --seg-on:#fff;
   --toast-bg:#111827; --toast-fg:#f5f7fa; --toast-act:#8fb6ff;
   --ease:cubic-bezier(.22,1,.36,1);
+  --chev:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%236b7487%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E");
   --font:system-ui,-apple-system,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
 }
 /* Escuro "Grafite" (escolhido pelo utilizador) */
@@ -39,6 +40,7 @@ html[data-theme="dark"]{
   --red:#ff6161; --green:#38c98a; --amber:#e0a43a; --bar:#3a414c;
   --shadow:none; --nav:rgba(22,25,29,.92); --seg-on:#3a414c;
   --toast-bg:#e6e8eb; --toast-fg:#121417; --toast-act:#2f6fde;
+  --chev:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%238a919c%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27m6 9 6 6 6-6%27/%3E%3C/svg%3E");
   color-scheme:dark;
 }
 html[data-theme="dark"] dialog::backdrop{background:rgba(0,0,0,.65)}
@@ -83,10 +85,16 @@ h2{font-size:16px; line-height:20px; font-weight:600; margin:0 0 12px}
 .link{border:0; background:none; color:var(--accent); font:inherit; font-size:14px; font-weight:500; padding:4px 0}
 label{display:block; font-size:13px; line-height:16px; color:var(--muted); margin:16px 0 8px}
 /* 16px no mínimo: abaixo disso o iPhone faz zoom ao tocar no campo */
-input,select,textarea{width:100%; font:inherit; font-size:16px; color:var(--text); background:var(--raised); border:1px solid transparent; border-radius:12px; padding:12px; min-height:48px}
+input,select,textarea{display:block; width:100%; min-width:0; font:inherit; font-size:16px; line-height:22px; color:var(--text); background-color:var(--raised); border:1px solid transparent; border-radius:12px; padding:12px 14px; height:48px; margin:0;
+  -webkit-appearance:none; appearance:none}
+/* o Safari dá ao campo de data largura e altura próprias: obrigar a seguir a grelha */
+input[type="date"]{text-align:left}
+input[type="date"]::-webkit-date-and-time-value{text-align:left; margin:0}
+input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6}
+select{padding-right:40px; background-image:var(--chev); background-repeat:no-repeat; background-position:right 14px center; background-size:16px 16px}
 input::placeholder{color:var(--muted)}
 input:focus,select:focus{outline:none; border-color:var(--accent)}
-.amount{font-size:48px; line-height:1; font-weight:600; letter-spacing:-.02em; text-align:center; padding:24px 0 16px; min-height:0; font-variant-numeric:tabular-nums;
+.amount{font-size:48px; line-height:1; font-weight:600; letter-spacing:-.02em; text-align:center; padding:24px 0 16px; height:auto; font-variant-numeric:tabular-nums;
   background:transparent; border:0; border-bottom:1px dashed var(--dash); border-radius:0}
 .amount:focus{border-color:transparent; border-bottom-color:var(--accent)}
 .amount::placeholder{color:var(--muted); opacity:.5}
@@ -106,7 +114,8 @@ input:focus,select:focus{outline:none; border-color:var(--accent)}
 .chip.on{border-color:var(--accent); background:var(--sel)}
 .dot{width:8px; height:8px; border-radius:50%; flex:none; display:inline-block; background:var(--muted)}
 
-.row2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.row2{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px}
+.row2 > div{min-width:0}
 .btn{display:block; width:100%; min-height:52px; border:0; border-radius:26px; padding:12px 16px; font:inherit; font-weight:600; background:var(--accent); color:var(--on-accent); margin-top:20px}
 .btn.sec{background:var(--raised); color:var(--text); font-weight:500}
 .btn.danger{background:transparent; color:var(--red); border:1px solid color-mix(in srgb,var(--red) 45%,transparent)}
