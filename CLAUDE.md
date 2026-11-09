@@ -16,7 +16,7 @@ App **só para acompanhar os gastos do mês** (e as entradas). Sem transferênci
 - `index.html` — app inteira
 - `manifest.json` — nome "Jacob", ícones, atalhos (`./?v=add`, `./?v=inc`, `./?v=sum`; só funcionam no Android, não no iPhone)
 - `sw.js` — service worker (rede primeiro, cache como fallback offline)
-- `icon-192.png`, `icon-512.png`, `icon-maskable.png`
+- `icon-192.png`, `icon-512.png`, `icon-maskable.png` (talão a 74 %, para recorte), `apple-touch-icon.png` (180×180, iPhone). Ícone: talão branco inclinado sobre degradê violeta→azul (`#7b6cff`→`#2f6fde`), escolhido pelo utilizador
 - `.nojekyll` — evita processamento Jekyll no Pages
 
 ## Modelo de dados (`localStorage["gastos.v1"]`, versão 3)
