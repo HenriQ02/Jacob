@@ -65,7 +65,7 @@ body.sub header h1{font-size:18px}
 .hdrbtn{border:0; background:var(--raised); color:var(--text); width:40px; height:40px; border-radius:50%; display:grid; place-items:center; padding:0; flex:none}
 .hdrbtn .i{width:20px; height:20px}
 .me{border:0; width:40px; height:40px; border-radius:50%; background:var(--raised); color:var(--text); font:inherit; font-size:16px; font-weight:600; padding:0; flex:none}
-main{padding:0 16px calc(96px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto}
+main{position:relative; z-index:1; padding:0 16px calc(96px + env(safe-area-inset-bottom)); max-width:640px; margin:0 auto}
 body.sub main{padding-bottom:calc(32px + env(safe-area-inset-bottom))}
 
 /* ---------- Navegação inferior ---------- */
@@ -136,6 +136,47 @@ input:focus,select:focus{outline:none; border-color:var(--accent)}
 .act .c{width:52px; height:52px; border-radius:50%; background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); display:grid; place-items:center}
 .act .c .i{width:22px; height:22px}
 .act.pri .c{background:var(--accent); color:var(--on-accent); border-color:transparent}
+
+/* ---------- Fundo do Início ---------- */
+/* cores registadas para poderem mudar suavemente quando muda o ritmo de gastos */
+@property --g1{syntax:"<color>"; inherits:true; initial-value:#4c8dff}
+@property --g2{syntax:"<color>"; inherits:true; initial-value:#2fc6b5}
+@property --g3{syntax:"<color>"; inherits:true; initial-value:#7b6cff}
+body{--g1:#4c8dff; --g2:#2fc6b5; --g3:#7b6cff; transition:--g1 1.2s var(--ease),--g2 1.2s var(--ease),--g3 1.2s var(--ease)}
+body[data-mood="warm"]{--g1:#7b6cff; --g2:#4c8dff; --g3:#d36bd0}
+body[data-mood="hot"]{--g1:#ff8a3d; --g2:#ff5d6c; --g3:#f5b544}
+.glow{position:absolute; top:0; left:0; right:0; height:min(600px,75vh); overflow:hidden; pointer-events:none; z-index:0; opacity:0; transition:opacity .4s var(--ease);
+  -webkit-mask-image:linear-gradient(#000 35%,transparent); mask-image:linear-gradient(#000 35%,transparent)}
+body.home .glow{opacity:1}
+.glow i{position:absolute; width:90vw; height:90vw; max-width:520px; max-height:520px; border-radius:50%; filter:blur(48px); opacity:.42; will-change:transform}
+html[data-theme="dark"] .glow i{opacity:.38}
+.glow i:nth-child(1){background:var(--g1); top:-28%; left:-24%; animation:drift1 22s ease-in-out infinite alternate}
+.glow i:nth-child(2){background:var(--g2); top:-12%; right:-34%; animation:drift2 27s ease-in-out infinite alternate}
+.glow i:nth-child(3){background:var(--g3); top:14%; left:18%; width:64vw; height:64vw; animation:drift3 31s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(14%,12%) scale(1.15)}}
+@keyframes drift2{to{transform:translate(-16%,10%) scale(.9)}}
+@keyframes drift3{to{transform:translate(-10%,-14%) scale(1.2)}}
+@media (prefers-reduced-motion: reduce){.glow i{animation:none}}
+/* no Início o cabeçalho fica por cima do fundo, transparente */
+body.home header{position:absolute; left:0; right:0; background:transparent}
+body.home main{padding-top:calc(env(safe-area-inset-top) + 64px)}
+body.home .hdrbtn, body.home .me{background:color-mix(in srgb,var(--card) 55%,transparent); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px)}
+
+/* ---------- Habituais ---------- */
+.habhead{display:flex; justify-content:space-between; align-items:baseline; margin:8px 4px 8px}
+.habhead h2{margin:0}
+.habhead small{font-size:12px; color:var(--muted)}
+.habits{display:flex; gap:8px; overflow-x:auto; margin:0 -16px 8px; padding:0 16px 4px; scrollbar-width:none; scroll-snap-type:x proximity; scroll-padding:0 16px}
+.habits::-webkit-scrollbar{display:none}
+.hab{flex:none; width:116px; min-height:120px; display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:12px; border-radius:18px;
+  border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow); color:var(--text); font:inherit; text-align:left; scroll-snap-align:start}
+.hab .av{width:32px; height:32px; font-size:14px; margin-bottom:4px}
+.hab .lb{font-size:13px; line-height:16px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-2)}
+.hab b{font-size:16px; font-weight:600; font-variant-numeric:tabular-nums}
+.hab small{font-size:11px; line-height:14px; color:var(--muted); margin-top:auto}
+.hab.today small{color:var(--green)}
+.hab.add{justify-content:center; align-items:center; gap:8px; border-style:dashed; background:transparent; box-shadow:none; color:var(--text-2); font-size:13px}
+.hab.add .c{width:32px; height:32px; border-radius:50%; background:var(--raised); display:grid; place-items:center}
 
 /* ---------- Linhas de movimentos ---------- */
 .av{width:40px; height:40px; border-radius:50%; flex:none; display:grid; place-items:center; font-size:16px; font-weight:600;
@@ -241,6 +282,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
 </style>
 </head>
 <body>
+<div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
 <header>
   <div class="hl">
     <button class="hdrbtn" id="back" aria-label="Voltar"><span data-i="left"></span></button>
@@ -264,6 +306,8 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
       <button class="act" id="actR"><span class="c"><span data-i="plus"></span></span>Entrada</button>
       <button class="act" id="actM"><span class="c"><span data-i="more"></span></span>Mais</button>
     </div>
+    <div class="habhead"><h2>Habituais</h2><small>um toque regista hoje</small></div>
+    <div class="habits" id="habits"></div>
     <div id="banners"></div>
     <div class="card">
       <div class="cardhead"><h2>Transações recentes</h2><button class="link" id="seeAll">Ver tudo</button></div>
@@ -275,7 +319,6 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
   <section id="v-add" class="hidden">
     <div class="seg kind"><button class="on" data-kind="add">Despesa</button><button data-kind="inc">Entrada</button></div>
     <input id="amount" class="amount" inputmode="decimal" placeholder="0,00 €" autocomplete="off">
-    <div class="quick" id="quick" style="margin-top:16px"></div>
     <label>Categoria</label>
     <div class="chips" id="catChips"></div>
     <div class="row2">
@@ -285,7 +328,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     <label>Descrição (opcional)</label>
     <input id="note" placeholder="ex.: Continente, gasolina, jantar" autocomplete="off">
     <button class="btn" id="saveBtn">Guardar</button>
-    <div class="links" id="addLinks"><button id="mkQuick"><span data-i="zap"></span>Criar atalho</button><button id="mkRecD"><span data-i="repeat"></span>Tornar recorrente</button></div>
+    <div class="links" id="addLinks"><button id="mkQuick"><span data-i="zap"></span>Guardar como habitual</button><button id="mkRecD"><span data-i="repeat"></span>Tornar recorrente</button></div>
     <button class="btn danger small hidden" id="delBtn">Apagar despesa</button>
   </section>
 
@@ -363,7 +406,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
       <p class="hint" style="margin:12px 0 0">Auto segue o modo do telemóvel.</p>
     </div>
     <div class="card"><h2>Recorrentes</h2><p class="hint">Aparecem no Início para confirmares, no dia escolhido de cada mês.</p><div id="recList"></div></div>
-    <div class="card"><h2>Atalhos</h2><p class="hint">Um toque regista a despesa. Cria-os em Mais → Criar atalho.</p><div id="quickList"></div></div>
+    <div class="card"><h2>Habituais</h2><p class="hint">As que crias ficam sempre no Início. A app também sugere sozinha as despesas que repetes (3 vezes ou mais nos últimos 90 dias).</p><div id="quickList"></div></div>
     <div class="card">
       <h2>Categorias de despesa</h2><div id="catsD"></div>
       <button class="btn sec small" data-addcat="D">Nova categoria de despesa</button>
@@ -401,7 +444,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
 
 <dialog id="more" class="sheet">
   <div class="grab"></div>
-  <button class="row" data-more="quick"><span class="c"><span data-i="zap"></span></span>Criar atalho de despesa</button>
+  <button class="row" data-more="quick"><span class="c"><span data-i="zap"></span></span>Nova despesa habitual</button>
   <button class="row" data-more="recD"><span class="c"><span data-i="repeat"></span></span>Despesa recorrente</button>
   <button class="row" data-more="recR"><span class="c"><span data-i="repeat"></span></span>Entrada recorrente</button>
   <button class="row" data-more="acc"><span class="c"><span data-i="wallet"></span></span>Contas e saldos</button>
@@ -610,6 +653,7 @@ function show(v){
   view = v;
   const sub = !TABS.includes(v);
   document.body.classList.toggle("sub", sub);
+  document.body.classList.toggle("home", v === "home");
   $$("main > section").forEach(s => s.classList.add("hidden"));
   $("#v-"+v).classList.remove("hidden");
   $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
@@ -648,12 +692,62 @@ function renderHome(){
   if (pd) bits.push(`em ${MONTHS[+pm.slice(5)-1]} gastaste ${money(pd)}`);
   const s = bits.join(" · ");
   $("#homeSub").textContent = s ? s[0].toUpperCase() + s.slice(1) : "";
+  // cor do fundo: ritmo de gastos comparado com o mês passado até ao mesmo dia
+  const day = +todayISO().slice(8), pace = pd && d ? d / (pd * day / daysIn(m)) : 0;
+  document.body.dataset.mood = pace > 1.1 ? "hot" : pace > 0.9 ? "warm" : "calm";
+  renderHabits();
   // as transferências antigas ficam guardadas, mas já não aparecem
   const recent = db.tx.filter(t => t.type !== "T").sort(byNewest).slice(0, 6);
   $("#recent").innerHTML = recent.length ? recent.map(t => txRow(t, true)).join("")
     : `<div class="empty">Ainda sem movimentos. Toca em Despesa para registar o primeiro.</div>`;
   $$("#recent .tx").forEach(e => e.onclick = () => editTx(e.dataset.id));
   $("#seeAll").classList.toggle("hidden", !recent.length);
+}
+/* ---------- Habituais: as fixas (db.quick) e as sugeridas pelo histórico ---------- */
+const habKey = (label, cents, cat) => [String(label || "").trim().toLowerCase(), cents, cat].join("|");
+function habits(){
+  const today = todayISO(), since = new Date(); since.setDate(since.getDate() - 90);
+  const sinceISO = `${since.getFullYear()}-${pad(since.getMonth()+1)}-${pad(since.getDate())}`;
+  const seen = {};
+  for (const t of db.tx) {
+    if (t.type !== "D") continue;
+    const c = catById(t.cat) || NOCAT;
+    const k = habKey(t.note || c.name, t.cents, t.cat);
+    const g = seen[k] || (seen[k] = {label: t.note || c.name, note: t.note, cents: t.cents, cat: t.cat, method: t.method, n: 0, last: ""});
+    if (t.date >= sinceISO) g.n++;
+    if (t.date > g.last) { g.last = t.date; g.method = t.method; }
+  }
+  const okMethod = m => db.methods.includes(m) ? m : db.methods[0];
+  const fixed = db.quick.map(q => { const g = seen[habKey(q.note || q.label, q.cents, q.cat)];
+    return {...q, method: okMethod(q.method), last: g ? g.last : "", fixed: true}; });
+  const fixedKeys = new Set(db.quick.map(q => habKey(q.note || q.label, q.cents, q.cat)));
+  const sug = Object.entries(seen).filter(([k, g]) => g.n >= 3 && !fixedKeys.has(k))
+    .sort((a, b) => b[1].n - a[1].n).slice(0, 8).map(([, g]) => ({...g, method: okMethod(g.method)}));
+  return [...fixed, ...sug];
+}
+function lastTxt(iso){
+  if (!iso) return "";
+  const days = Math.round((new Date(todayISO()) - new Date(iso)) / 864e5);
+  return days <= 0 ? "registado hoje" : days === 1 ? "ontem" : `há ${days} dias`;
+}
+let habList = [], habLock = 0;
+function renderHabits(){
+  habList = habits();
+  const today = todayISO();
+  $("#habits").innerHTML = habList.map((x, i) => { const c = catById(x.cat) || NOCAT;
+    return `<button class="hab ${x.last === today ? "today" : ""}" data-h="${i}">${avatar(c, x.label)}<span class="lb">${esc(x.label)}</span><b>${money(x.cents)}</b><small>${lastTxt(x.last)}</small></button>`; }).join("")
+    + `<button class="hab add" id="habAdd"><span class="c">${icon("plus")}</span>Nova</button>`;
+  $$("#habits [data-h]").forEach(b => b.onclick = () => useHabit(habList[+b.dataset.h]));
+  $("#habAdd").onclick = () => $("#mkQuick").onclick();
+}
+function useHabit(x){
+  if (!x || Date.now() - habLock < 800) return;   // evita registar duas vezes com um toque duplo
+  habLock = Date.now();
+  const t = addTx({date: todayISO(), cents: x.cents, type:"D", cat: x.cat, method: x.method, note: x.note || x.label, source:""});
+  render();
+  budgetAlert(t);
+  if (!budgetAlert._shown) toast(`${x.label}: ${money(x.cents)} registado`, {action:"Anular", ms:4000,
+    onAction: () => { db.tx = db.tx.filter(y => y.id !== t.id); save(); render(); toast("Anulado"); }});
 }
 $("#toSum").onclick = () => { curMonth = ym(todayISO()); show("sum"); };
 $("#seeAll").onclick = () => { curMonth = ym(todayISO()); show("list"); };
@@ -743,10 +837,6 @@ function budgetAlert(t){
 /* ================= Despesa ================= */
 let fCat = null, editingId = null, iEditId = null;
 function renderForm(){
-  $("#quick").innerHTML = db.quick.map(q => { const c = catById(q.cat) || NOCAT;
-    return `<button data-q="${q.id}">${dot(c)}${esc(q.label)}<span class="num">${money(q.cents)}</span></button>`; }).join("");
-  $("#quick").classList.toggle("hidden", !db.quick.length || !!editingId);
-  $$("#quick button").forEach(b => b.onclick = () => useQuick(b.dataset.q));
   const cats = db.cats.filter(c => c.type === "D");
   if (fCat && !cats.some(c=>c.id===fCat)) fCat = null;
   $("#catChips").innerHTML = cats.map(c =>
@@ -783,25 +873,17 @@ $("#saveBtn").onclick = () => {
     budgetAlert(t); if (!budgetAlert._shown) toast(`Despesa de ${money(cents)} guardada`);
   }
 };
-function useQuick(id){
-  const q = db.quick.find(x => x.id === id); if (!q) return;
-  const t = addTx({date: todayISO(), cents: q.cents, type:"D", cat:q.cat, method:q.method, note:q.note || q.label, source:""});
-  resetForm(); show(backTo);
-  budgetAlert(t);
-  if (!budgetAlert._shown) toast(`${q.label}: ${money(q.cents)} registado`, {action:"Anular", ms:4000,
-    onAction: () => { db.tx = db.tx.filter(x => x.id !== t.id); save(); render(); toast("Anulado"); }});
-}
 $("#mkQuick").onclick = async () => {
-  const out = await ask("Novo atalho", [
-    {k:"label", label:"Nome do botão", value:$("#note").value.trim(), ph:"ex.: Café"},
+  const out = await ask("Nova despesa habitual", [
+    {k:"label", label:"Nome", value:$("#note").value.trim(), ph:"ex.: Senha da cantina"},
     {k:"cents", label:"Valor (€)", type:"money", value:$("#amount").value},
     {k:"cat", label:"Categoria", type:"select", options:catOptions("D"), value:fCat},
-    {k:"method", label:"Conta / método", type:"select", options:methodOptions(), value:$("#method").value},
-  ], {hint:"Um toque no atalho regista logo a despesa com a data de hoje.",
-      validate: o => !o.label ? "Dá um nome ao atalho" : !o.cents ? "Escreve um valor" : null});
+    {k:"method", label:"Conta", type:"select", options:methodOptions(), value:$("#method").value},
+  ], {hint:"Fica no Início. Um toque regista a despesa com a data de hoje.",
+      validate: o => !o.label ? "Dá-lhe um nome" : !o.cents ? "Escreve um valor" : !o.cat ? "Escolhe uma categoria" : null});
   if (!out || out === "delete") return;
   db.quick.push({id: uid(), label: out.label, cents: out.cents, cat: out.cat, method: out.method, note: out.label});
-  save(); render(); toast("Atalho criado, aparece em Nova despesa");
+  save(); resetForm(); if (view === "add") show(backTo); else render(); toast("Habitual criada, está no Início");
 };
 $("#mkRecD").onclick = () => editRecurring(null, {type:"D", cents: parseCents($("#amount").value) || 0, cat: fCat, method: $("#method").value, note: $("#note").value.trim()});
 $("#delBtn").onclick = () => {
