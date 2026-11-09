@@ -1,12 +1,12 @@
 # Jacob — app pessoal de controlo de gastos
 
-App **só para acompanhar os gastos do mês** (e as entradas). Sem contas, saldos nem transferências: o utilizador pediu explicitamente para não ter isso. PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (Partilhar → Adicionar ao ecrã principal). Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
+App **só para acompanhar os gastos do mês** (e as entradas). Sem transferências (o utilizador pediu explicitamente). Há saldos por conta só para comparar com o banco. PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (Partilhar → Adicionar ao ecrã principal). Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
 
 ## Regras do projeto
 - **Manter a app leve**: sem frameworks, sem bibliotecas externas, sem CDNs, sem imagens pesadas. Tudo em `index.html` (HTML + CSS + JS inline, vanilla JS).
 - **Dados só no telemóvel**: `localStorage`, nunca enviar dados para servidores. O repositório é público mas só contém código.
 - **Funciona offline**: qualquer ficheiro novo tem de entrar na lista `FILES` do `sw.js`. Ao alterar a app, **incrementar `CACHE` em `sw.js`** (ex.: `jacob-v7` → `jacob-v8`).
-- **Nunca partir dados existentes**: alterações ao modelo de dados passam pela função `migrate()` (campos novos com valor por defeito). A chave `localStorage` continua `gastos.v1`.
+- **Nunca partir dados existentes**: alterações ao modelo de dados passam pela função `migrate()` (vê `d.version` antes de mudar) (campos novos com valor por defeito). A chave `localStorage` continua `gastos.v1`.
 - Valores monetários guardados em **cêntimos (inteiros)**. Formatação `pt-PT`, EUR, datas `YYYY-MM-DD` internamente.
 - Textos da interface em PT-PT.
 - Testar em viewport móvel (390×844), modo claro e escuro, antes de publicar.
@@ -19,19 +19,20 @@ App **só para acompanhar os gastos do mês** (e as entradas). Sem contas, saldo
 - `icon-192.png`, `icon-512.png`, `icon-maskable.png`
 - `.nojekyll` — evita processamento Jekyll no Pages
 
-## Modelo de dados (`localStorage["gastos.v1"]`, versão 2)
+## Modelo de dados (`localStorage["gastos.v1"]`, versão 3)
 ```
 {
-  version: 2,
+  version: 3,
   cats:      [{id, emoji, name, type:"D"|"R", budget /*cêntimos, 0 = sem*/}],
-  methods:   ["Cartão de débito", ...],          // também servem de "contas"
+  methods:   ["BPI","Revolut","Trade Republic","Dinheiro"], // contas reais (campo Conta)
+  bases:     {"BPI": {cents, date:"YYYY-MM-DD", at:timestamp}}, // saldo base por conta
   tx:        [{id, date, cents, type:"D"|"R"|"T", cat, method, to /*só T*/, note, source /*fonte, só R*/}],
   recurring: [{id, type, cents, cat, method, note, source, day, from:"YYYY-MM", last:"YYYY-MM", active}],
   pending:   [{id, recId, ...campos de tx}],     // recorrentes à espera de confirmação
   quick:     [{id, label, cents, cat, method, note}],   // atalhos de despesa
   goals:     [{id, name, emoji, target, saved}],        // metas de poupança (não afetam contas)
   debts:     [{id, person, cents, dir:"owed"|"owe", note, date}],
-  accInit:   {"<método>": cêntimos},             // saldos iniciais das contas
+  accInit:   {...},                              // antigo, já não usado (substituído por bases)
   lastBackup: timestamp|null, since: timestamp
 }
 ```
@@ -40,12 +41,13 @@ Tema guardado à parte em `localStorage["gastos.theme"]` = `light` | `dark` | `a
 ## Ecrãs e navegação (estilo app de banco)
 Barra de baixo com 3 separadores: **Início · Movimentos · Resumo**. Despesa, Entrada, Metas e dívidas e Definições abrem como páginas por cima, com botão de voltar e sem barra de baixo (`body.sub`). `show(v)` troca de ecrã; `openSub(v)` abre uma página e guarda em `backTo` o separador para onde voltar; `back()` volta.
 - **Início** (`v-home`): gastos do mês em grande (`bigMoney()`), linha com entradas e gastos do mês anterior, botão "Ver resumo", 3 ações redondas (Despesa, Entrada, Mais), banners e as 6 transações mais recentes. Avatar "J" no canto abre Definições; lupa abre Movimentos com pesquisa.
-- **Mais** (`#more`, folha que sobe de baixo): criar atalho, despesa/entrada recorrente, Metas e dívidas, Definições.
+- **Mais** (`#more`, folha que sobe de baixo): criar atalho, despesa/entrada recorrente, Contas e saldos, Metas e dívidas, Definições.
+- **Contas e saldos** (`v-acc`): saldo base por conta (o que o banco mostra no momento). `accBalance()` = base + entradas − despesas dessa conta registadas depois da base (mesmo dia conta só se o movimento foi criado depois, via `createdAt(id)`). Botão Acertar compara com o saldo real e pode trocar a base. Lista os movimentos com nomes de conta antigos (MB Way, Cartão de débito…) para o utilizador escolher a conta; nunca mapear automaticamente sem ele escolher.
 - **Despesa** (`v-add`) / **Entrada** (`v-inc`): seletor Despesa|Entrada no topo, valor grande, atalhos (1 toque regista, com "Anular"), categoria (chips), data, conta, descrição. Guardar volta ao separador de origem. Alerta de orçamento a 80 % e ao exceder (`budgetAlert`).
 - **Movimentos** (`v-list`): mês, pesquisa, totais do mês numa linha, lista agrupada por dia. Tocar para editar.
 - **Resumo** (`v-sum`): gastos do mês em grande com comparação e previsão, entradas e saldo do mês, últimos 6 meses (gráfico principal), categorias (barra de partilha + linhas com orçamento), entradas por fonte (`renderSrc`), saldo acumulado no ano.
 - **Metas e dívidas** (`v-wal`, página aberta em Mais): metas de poupança e dívidas (devem-me / eu devo).
-- **Removido a pedido do utilizador:** transferências, contas com saldos, saldos iniciais. Os dados antigos (`tx` do tipo `T`, `accInit`) ficam guardados mas não aparecem; não voltar a pôr sem ele pedir.
+- **Removido a pedido do utilizador:** transferências e o saldo total no Início. Os dados antigos (`tx` do tipo `T`, `accInit`) ficam guardados mas não aparecem; não voltar a pôr sem ele pedir.
 - **Definições** (`v-set`): aparência, recorrentes, atalhos, categorias e orçamentos, contas, cópias de segurança (JSON e CSV, ficheiros `jacob-…`), apagar tudo.
 - Linhas de movimentos: `txRow(t)` com `avatar()` (círculo com a inicial na cor da categoria, `catColor()`). Datas relativas com `relDay()` (Hoje, Ontem, 6 nov).
 - `ask(title, fields, opt)` — diálogo genérico reutilizável (tipos: text, money, select, date, number).

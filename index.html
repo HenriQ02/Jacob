@@ -202,6 +202,7 @@ label + .item{border-top:0}
 .setcat + .setcat{border-top:1px solid var(--line)}
 .setcat .n{flex:1; min-width:0}
 .setcat small{color:var(--muted); font-size:13px}
+select.compact{width:auto; max-width:150px; height:36px; padding:0 32px 0 12px; border-radius:18px; font-size:16px; background-position:right 10px center}
 
 .banner{display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; margin:8px 0; font-size:14px; box-shadow:var(--shadow)}
 .banner > .i{color:var(--muted)}
@@ -327,6 +328,17 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     <div class="card"><h2 id="balTitle">Saldo acumulado no ano</h2><div id="balLine"></div></div>
   </section>
 
+  <!-- CONTAS E SALDOS -->
+  <section id="v-acc" class="hidden">
+    <p class="hint" style="margin:4px 4px 0">Escreve o saldo que o banco mostra agora. A partir daí a app soma as entradas e tira as despesas de cada conta. Para comparar com o banco, toca em Acertar.</p>
+    <div class="card"><div id="accList"></div></div>
+    <div class="card hidden" id="oldCard">
+      <h2>Movimentos com contas antigas</h2>
+      <p class="hint">Escolhe a conta de cada um. Muda em todos os movimentos com esse nome; também podes mudar um a um ao editar.</p>
+      <div id="oldList"></div>
+    </div>
+  </section>
+
   <!-- METAS E DÍVIDAS -->
   <section id="v-wal" class="hidden">
     <div class="card">
@@ -362,7 +374,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     </div>
     <div class="card">
       <h2>Contas</h2>
-      <p class="hint">As opções do campo Conta em cada despesa e entrada. Separadas por vírgulas.</p>
+      <p class="hint">As contas que aparecem em cada despesa e entrada. Separadas por vírgulas. Os saldos estão em Mais → Contas e saldos.</p>
       <input id="methodsInput">
       <button class="btn sec small" id="saveMethods">Guardar</button>
     </div>
@@ -392,6 +404,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
   <button class="row" data-more="quick"><span class="c"><span data-i="zap"></span></span>Criar atalho de despesa</button>
   <button class="row" data-more="recD"><span class="c"><span data-i="repeat"></span></span>Despesa recorrente</button>
   <button class="row" data-more="recR"><span class="c"><span data-i="repeat"></span></span>Entrada recorrente</button>
+  <button class="row" data-more="acc"><span class="c"><span data-i="wallet"></span></span>Contas e saldos</button>
   <button class="row" data-more="wal"><span class="c"><span data-i="target"></span></span>Metas e dívidas</button>
   <button class="row" data-more="set"><span class="c"><span data-i="gear"></span></span>Definições</button>
 </dialog>
@@ -418,13 +431,20 @@ const DEFAULT = () => ({
     ["🎁","Presentes","D"],["📦","Outros","D"],
     ["💼","Salário / bolsa","R"],["👪","Família","R"],["🏷️","Vendas","R"],["💰","Outras receitas","R"]
   ].map(([emoji,name,type]) => ({id: uid(), emoji, name, type, budget: 0})),
-  methods: ["Cartão de débito","Cartão de crédito","MB Way","Dinheiro","Transferência","Débito direto"],
+  methods: ["BPI","Revolut","Trade Republic","Dinheiro"],
   tx: []
 });
+const ACCOUNTS = ["BPI","Revolut","Trade Republic","Dinheiro"];
 function migrate(d){
-  d.version = 2;
+  const from = d.version || 1;
   for (const k of ["tx","cats","methods","recurring","pending","quick","goals","debts"]) if (!Array.isArray(d[k])) d[k] = [];
   if (!d.accInit || typeof d.accInit !== "object") d.accInit = {};
+  // v3: o campo Conta passa a ser a conta real. Os movimentos antigos mantêm o nome antigo
+  // até o utilizador escolher a conta em Mais → Contas e saldos.
+  if (from < 3) d.methods = [...ACCOUNTS];
+  // saldo base por conta: {cents, date:"YYYY-MM-DD", at: timestamp de quando foi definido}
+  if (!d.bases || typeof d.bases !== "object") d.bases = {};
+  d.version = 3;
   if (!("lastBackup" in d)) d.lastBackup = null;
   if (!d.since) d.since = Date.now();
   return d;
@@ -452,6 +472,8 @@ const pad = n => String(n).padStart(2,"0");
 const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const ym = iso => iso.slice(0,7);
 const cents2str = c => c ? (c/100).toFixed(2).replace(".",",") : "";
+// aceita "-" ou "−" à frente (saldo negativo)
+const parseSigned = s => /^\s*[-−]/.test(String(s ?? "")) ? -parseCents(String(s).replace(/[-−]/, "")) : parseCents(s);
 function parseCents(str){
   if (str == null) return NaN;
   let s = String(str).trim().replace(/[€\s]/g,"");
@@ -553,7 +575,7 @@ function ask(title, fields, opt = {}){
       const id = "f_"+i, v = f.value ?? "";
       let inp;
       if (f.type === "select") inp = `<select id="${id}">${f.options.map(([ov,ol]) => `<option value="${esc(ov)}" ${String(ov)===String(v)?"selected":""}>${esc(ol)}</option>`).join("")}</select>`;
-      else if (f.type === "money") inp = `<input id="${id}" inputmode="decimal" value="${esc(typeof v==="number"?cents2str(v):v)}" placeholder="${esc(f.ph||"0,00")}">`;
+      else if (f.type === "money" || f.type === "smoney") inp = `<input id="${id}" inputmode="decimal" value="${esc(typeof v==="number"?cents2str(v):v)}" placeholder="${esc(f.ph||"0,00")}">`;
       else if (f.type === "number") inp = `<input id="${id}" type="number" inputmode="numeric" value="${esc(v)}" min="${f.min??""}" max="${f.max??""}">`;
       else if (f.type === "date") inp = `<input id="${id}" type="date" value="${esc(v)}">`;
       else if (f.type === "emoji") inp = `<input id="${id}" maxlength="4" value="${esc(v)}" style="text-align:center;font-size:22px;padding:8px">`;
@@ -566,7 +588,7 @@ function ask(title, fields, opt = {}){
     const done = r => { d.close(); res(r); };
     $("#dlgOk").onclick = () => {
       const out = {};
-      fields.forEach((f,i) => { const v = $("#f_"+i).value; out[f.k] = f.type==="money" ? parseCents(v) : f.type==="number" ? Number(v) : v.trim(); });
+      fields.forEach((f,i) => { const v = $("#f_"+i).value; out[f.k] = f.type==="money" ? parseCents(v) : f.type==="smoney" ? parseSigned(v) : f.type==="number" ? Number(v) : v.trim(); });
       if (opt.validate) { const err = opt.validate(out); if (err) { toast(err); return; } }
       done(out);
     };
@@ -581,7 +603,7 @@ const methodOptions = () => db.methods.map(m => [m,m]);
 
 /* ================= Navegação ================= */
 // separadores (barra de baixo) e páginas que abrem por cima com botão de voltar
-const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", wal:"Metas e dívidas", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
+const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", acc:"Contas e saldos", wal:"Metas e dívidas", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
 const TABS = ["home","list","sum"];
 let view = "home", backTo = "home";
 function show(v){
@@ -612,7 +634,7 @@ $$(".kind button").forEach(b => b.onclick = () => { if (b.dataset.kind !== view)
 function render(){
   $$(".mlabel").forEach(e => e.textContent = monthLabel(curMonth));
   renderBanners();
-  ({home:renderHome, add:renderForm, inc:renderInc, list:renderList, sum:renderSum, wal:renderWallet, set:renderSet})[view]();
+  ({home:renderHome, add:renderForm, inc:renderInc, list:renderList, sum:renderSum, wal:renderWallet, acc:renderAcc, set:renderSet})[view]();
 }
 
 /* ================= Início ================= */
@@ -645,7 +667,7 @@ $("#more").onclick = e => {
   d.close();
   const blank = tp => ({type:tp, cents:0, cat:null, method:db.methods[0], note:"", source:""});
   ({quick: () => $("#mkQuick").onclick(), recD: () => editRecurring(null, blank("D")), recR: () => editRecurring(null, blank("R")),
-    wal: () => openSub("wal"), set: () => openSub("set")})[b.dataset.more]();
+    acc: () => openSub("acc"), wal: () => openSub("wal"), set: () => openSub("set")})[b.dataset.more]();
 };
 
 /* ================= Recorrentes + lembretes ================= */
@@ -990,6 +1012,63 @@ function renderWallet(){
   $("#debts").innerHTML = (!db.debts.length ? `<p class="hint">Ex.: "Rui deve-me 12 € do jantar". Toca numa dívida quando for paga.</p>` : "") + sec("Devem-me", owed, "pos") + sec("Eu devo", owe, "neg");
   $$("[data-debt]").forEach(e => e.onclick = () => editDebt(db.debts.find(d => d.id === e.dataset.debt)));
 }
+/* ================= Contas e saldos ================= */
+// quando foi criado um movimento (o id começa por Date.now() em base 36)
+const createdAt = id => { const n = parseInt(String(id).slice(0, 8), 36); return isNaN(n) ? 0 : n; };
+// saldo na app = saldo base + entradas − despesas registadas depois do saldo base
+function accBalance(name){
+  const b = db.bases[name]; if (!b) return null;
+  let v = b.cents;
+  for (const t of db.tx) {
+    if (t.method !== name || (t.type !== "D" && t.type !== "R")) continue;
+    if (t.date < b.date || (t.date === b.date && createdAt(t.id) <= b.at)) continue;
+    v += t.type === "R" ? t.cents : -t.cents;
+  }
+  return v;
+}
+function renderAcc(){
+  let tot = 0, any = false;
+  $("#accList").innerHTML = db.methods.map(name => {
+    const v = accBalance(name), b = db.bases[name];
+    if (v != null) { tot += v; any = true; }
+    const [, m, d] = b ? b.date.split("-").map(Number) : [];
+    return `<div class="item"><div class="t"><div>${esc(name)}</div><small>${b ? `Base ${money(b.cents)} em ${d} ${MSHORT[m-1]}` : "Sem saldo base"}</small></div>
+      ${v != null ? `<div class="v ${v<0?"neg":""}">${money(v)}</div>` : ""}<button class="mini" data-acc="${esc(name)}">${b ? "Acertar" : "Definir"}</button></div>`;
+  }).join("") + (any ? `<div class="item total"><div class="t">Total</div><div class="v ${tot<0?"neg":""}">${money(tot)}</div></div>` : "");
+  $$("[data-acc]").forEach(e => e.onclick = () => acertar(e.dataset.acc));
+  // movimentos com nomes de conta que já não existem (ex.: "MB Way", "Cartão de débito")
+  const old = {};
+  for (const t of db.tx) if ((t.type === "D" || t.type === "R") && t.method && !db.methods.includes(t.method)) old[t.method] = (old[t.method] || 0) + 1;
+  const names = Object.keys(old).sort((a, b) => old[b] - old[a]);
+  $("#oldCard").classList.toggle("hidden", !names.length);
+  $("#oldList").innerHTML = names.map((n, i) => `<div class="setcat"><div class="n">${esc(n)}<br><small>${old[n]} movimento${old[n] > 1 ? "s" : ""}</small></div>
+    <select class="compact" id="old_${i}"><option value="">Escolher</option>${db.methods.map(m => `<option>${esc(m)}</option>`).join("")}</select></div>`).join("");
+  names.forEach((n, i) => $("#old_" + i).onchange = e => {
+    const to = e.target.value; if (!to) return;
+    let k = 0;
+    for (const list of [db.tx, db.recurring, db.pending, db.quick]) for (const x of list) if (x.method === n) { x.method = to; k++; }
+    save(); render(); toast(`${n} passou a ${to}`);
+  });
+}
+async function acertar(name){
+  const cur = accBalance(name), had = !!db.bases[name];
+  const out = await ask(had ? `Acertar ${name}` : `Saldo base: ${name}`,
+    [{k:"cents", label:"Saldo que o banco mostra agora (€)", type:"smoney"}],
+    {hint: had ? `A app tem ${money(cur)}.` : "A partir de agora a app soma as entradas e tira as despesas desta conta.",
+     ok: had ? "Comparar" : "Guardar", del: had ? "Apagar saldo base" : null,
+     validate: o => isNaN(o.cents) ? "Escreve um valor" : null});
+  if (!out) return;
+  if (out === "delete") { delete db.bases[name]; save(); render(); toast("Saldo base apagado"); return; }
+  const setBase = () => { db.bases[name] = {cents: out.cents, date: todayISO(), at: Date.now()}; save(); render(); };
+  if (!had) { setBase(); toast("Saldo base guardado"); return; }
+  const diff = out.cents - cur;
+  if (diff === 0) { toast(`${name}: bate certo`); return; }
+  const why = diff < 0 ? "Há despesas por registar, ou uma entrada registada a mais." : "Há entradas por registar, ou uma despesa registada a mais.";
+  const ok = await ask(`${name} não bate certo`, [],
+    {hint: `App ${money(cur)} · Banco ${money(out.cents)} · Diferença ${diff > 0 ? "+" : ""}${money(diff)}. ${why}`, ok: "Usar o valor do banco"});
+  if (ok) { setBase(); toast("Saldo atualizado"); }
+}
+
 async function editGoal(g){
   const out = await ask(g ? "Editar meta" : "Nova meta", [
     {k:"name", label:"Nome", value: g ? g.name : "", ph:"ex.: Monitor ultrawide"},
