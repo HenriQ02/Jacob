@@ -1,6 +1,6 @@
 # Jacob — app pessoal de controlo de gastos
 
-PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (Partilhar → Adicionar ao ecrã principal). Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
+App **só para acompanhar os gastos do mês** (e as entradas). Sem contas, saldos nem transferências: o utilizador pediu explicitamente para não ter isso. PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (Partilhar → Adicionar ao ecrã principal). Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
 
 ## Regras do projeto
 - **Manter a app leve**: sem frameworks, sem bibliotecas externas, sem CDNs, sem imagens pesadas. Tudo em `index.html` (HTML + CSS + JS inline, vanilla JS).
@@ -38,13 +38,14 @@ PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (
 Tema guardado à parte em `localStorage["gastos.theme"]` = `light` | `dark` | `auto`.
 
 ## Ecrãs e navegação (estilo app de banco)
-Barra de baixo com 4 separadores: **Início · Movimentos · Resumo · Carteira**. Despesa, Entrada e Definições abrem como páginas por cima, com botão de voltar e sem barra de baixo (`body.sub`). `show(v)` troca de ecrã; `openSub(v)` abre uma página e guarda em `backTo` o separador para onde voltar; `back()` volta.
-- **Início** (`v-home`): saldo total grande (soma de `balances()`, cêntimos mais pequenos via `bigMoney()`), botão "Ver contas", linha do mês, 4 ações redondas (Despesa, Entrada, Transferir, Mais), banners e as 6 transações mais recentes. Avatar "J" no canto abre Definições; lupa abre Movimentos com pesquisa.
-- **Mais** (`#more`, folha que sobe de baixo): criar atalho, despesa/entrada recorrente, nova meta, nova dívida, Definições.
+Barra de baixo com 3 separadores: **Início · Movimentos · Resumo**. Despesa, Entrada, Metas e dívidas e Definições abrem como páginas por cima, com botão de voltar e sem barra de baixo (`body.sub`). `show(v)` troca de ecrã; `openSub(v)` abre uma página e guarda em `backTo` o separador para onde voltar; `back()` volta.
+- **Início** (`v-home`): gastos do mês em grande (`bigMoney()`), linha com entradas e gastos do mês anterior, botão "Ver resumo", 3 ações redondas (Despesa, Entrada, Mais), banners e as 6 transações mais recentes. Avatar "J" no canto abre Definições; lupa abre Movimentos com pesquisa.
+- **Mais** (`#more`, folha que sobe de baixo): criar atalho, despesa/entrada recorrente, Metas e dívidas, Definições.
 - **Despesa** (`v-add`) / **Entrada** (`v-inc`): seletor Despesa|Entrada no topo, valor grande, atalhos (1 toque regista, com "Anular"), categoria (chips), data, conta, descrição. Guardar volta ao separador de origem. Alerta de orçamento a 80 % e ao exceder (`budgetAlert`).
 - **Movimentos** (`v-list`): mês, pesquisa, totais do mês numa linha, lista agrupada por dia. Tocar para editar.
 - **Resumo** (`v-sum`): gastos do mês em grande com comparação e previsão, entradas e saldo do mês, últimos 6 meses (gráfico principal), categorias (barra de partilha + linhas com orçamento), entradas por fonte (`renderSrc`), saldo acumulado no ano.
-- **Carteira** (`v-wal`): saldos por conta, transferências (tipo `T`), metas, dívidas.
+- **Metas e dívidas** (`v-wal`, página aberta em Mais): metas de poupança e dívidas (devem-me / eu devo).
+- **Removido a pedido do utilizador:** transferências, contas com saldos, saldos iniciais. Os dados antigos (`tx` do tipo `T`, `accInit`) ficam guardados mas não aparecem; não voltar a pôr sem ele pedir.
 - **Definições** (`v-set`): aparência, recorrentes, atalhos, categorias e orçamentos, contas, cópias de segurança (JSON e CSV, ficheiros `jacob-…`), apagar tudo.
 - Linhas de movimentos: `txRow(t)` com `avatar()` (círculo com a inicial na cor da categoria, `catColor()`). Datas relativas com `relDay()` (Hoje, Ontem, 6 nov).
 - `ask(title, fields, opt)` — diálogo genérico reutilizável (tipos: text, money, select, date, number).

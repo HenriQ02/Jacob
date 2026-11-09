@@ -130,8 +130,8 @@ input:focus,select:focus{outline:none; border-color:var(--accent)}
 .bal .dec, .big .dec{font-size:.55em; font-weight:500; letter-spacing:0}
 .pill{display:inline-flex; align-items:center; gap:4px; height:32px; padding:0 8px 0 12px; border-radius:16px; background:var(--raised); border:0; color:var(--text); font:inherit; font-size:13px; font-weight:500}
 .pill .i{width:16px; height:16px; color:var(--text-2)}
-.hero .sub{margin-top:12px; font-size:13px; color:var(--muted)}
-.actions{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:24px 0 16px}
+.hero .sub{margin:0 0 12px; font-size:13px; color:var(--muted)}
+.actions{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:320px; margin:24px auto 16px}
 .act{display:flex; flex-direction:column; align-items:center; gap:8px; background:none; border:0; padding:0; color:var(--text); font:inherit; font-size:12px; line-height:16px}
 .act .c{width:52px; height:52px; border-radius:50%; background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); display:grid; place-items:center}
 .act .c .i{width:22px; height:22px}
@@ -253,15 +253,14 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
   <!-- INÍCIO -->
   <section id="v-home">
     <div class="hero">
-      <small>Saldo total</small>
+      <small id="homeLbl">Gastos este mês</small>
       <div class="bal" id="homeBal"></div>
-      <button class="pill" id="toWallet">Ver contas<span data-i="right"></span></button>
       <div class="sub" id="homeSub"></div>
+      <button class="pill" id="toSum">Ver resumo<span data-i="right"></span></button>
     </div>
     <div class="actions">
       <button class="act pri" id="actD"><span class="c"><span data-i="minus"></span></span>Despesa</button>
       <button class="act" id="actR"><span class="c"><span data-i="plus"></span></span>Entrada</button>
-      <button class="act" id="actT"><span class="c"><span data-i="swap"></span></span>Transferir</button>
       <button class="act" id="actM"><span class="c"><span data-i="more"></span></span>Mais</button>
     </div>
     <div id="banners"></div>
@@ -328,13 +327,8 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     <div class="card"><h2 id="balTitle">Saldo acumulado no ano</h2><div id="balLine"></div></div>
   </section>
 
-  <!-- CARTEIRA -->
+  <!-- METAS E DÍVIDAS -->
   <section id="v-wal" class="hidden">
-    <div class="card">
-      <div class="cardhead"><h2>Contas</h2><button class="mini" id="transfer"><span data-i="swap"></span>Transferir</button></div>
-      <div id="accounts"></div>
-      <button class="btn sec small" id="setInit">Definir saldos iniciais</button>
-    </div>
     <div class="card">
       <div class="cardhead"><h2>Metas de poupança</h2><button class="mini" id="newGoal"><span data-i="plus"></span>Nova</button></div>
       <div id="goals"></div>
@@ -368,7 +362,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     </div>
     <div class="card">
       <h2>Contas</h2>
-      <p class="hint">Separadas por vírgulas.</p>
+      <p class="hint">As opções do campo Conta em cada despesa e entrada. Separadas por vírgulas.</p>
       <input id="methodsInput">
       <button class="btn sec small" id="saveMethods">Guardar</button>
     </div>
@@ -391,7 +385,6 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
   <button data-v="home" class="on"><span data-i="home"></span>Início</button>
   <button data-v="list"><span data-i="list"></span>Movimentos</button>
   <button data-v="sum"><span data-i="chart"></span>Resumo</button>
-  <button data-v="wal"><span data-i="wallet"></span>Carteira</button>
 </nav>
 
 <dialog id="more" class="sheet">
@@ -399,8 +392,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
   <button class="row" data-more="quick"><span class="c"><span data-i="zap"></span></span>Criar atalho de despesa</button>
   <button class="row" data-more="recD"><span class="c"><span data-i="repeat"></span></span>Despesa recorrente</button>
   <button class="row" data-more="recR"><span class="c"><span data-i="repeat"></span></span>Entrada recorrente</button>
-  <button class="row" data-more="goal"><span class="c"><span data-i="target"></span></span>Nova meta de poupança</button>
-  <button class="row" data-more="debt"><span class="c"><span data-i="users"></span></span>Nova dívida</button>
+  <button class="row" data-more="wal"><span class="c"><span data-i="target"></span></span>Metas e dívidas</button>
   <button class="row" data-more="set"><span class="c"><span data-i="gear"></span></span>Definições</button>
 </dialog>
 
@@ -589,8 +581,8 @@ const methodOptions = () => db.methods.map(m => [m,m]);
 
 /* ================= Navegação ================= */
 // separadores (barra de baixo) e páginas que abrem por cima com botão de voltar
-const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", wal:"Carteira", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
-const TABS = ["home","list","sum","wal"];
+const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", wal:"Metas e dívidas", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
+const TABS = ["home","list","sum"];
 let view = "home", backTo = "home";
 function show(v){
   view = v;
@@ -625,22 +617,26 @@ function render(){
 
 /* ================= Início ================= */
 function renderHome(){
-  const tot = Object.values(balances()).reduce((a,v)=>a+v,0);
-  $("#homeBal").innerHTML = bigMoney(tot);
   const m = ym(todayISO()), l = monthTx(m), d = sumType(l,"D"), r = sumType(l,"R");
-  const mname = MONTHS[+m.slice(5)-1];
-  $("#homeSub").textContent = !l.length ? `Sem movimentos em ${mname}` : `Em ${mname}: gastaste ${money(d)} e recebeste ${money(r)}`;
-  const recent = [...db.tx].sort(byNewest).slice(0, 6);
+  const pm = shiftMonth(m, -1), pd = sumType(monthTx(pm),"D");
+  $("#homeLbl").textContent = `Gastos em ${MONTHS[+m.slice(5)-1]}`;
+  $("#homeBal").innerHTML = bigMoney(d);
+  const bits = [];
+  if (r) bits.push(`Recebeste ${money(r)}`);
+  if (pd) bits.push(`em ${MONTHS[+pm.slice(5)-1]} gastaste ${money(pd)}`);
+  const s = bits.join(" · ");
+  $("#homeSub").textContent = s ? s[0].toUpperCase() + s.slice(1) : "";
+  // as transferências antigas ficam guardadas, mas já não aparecem
+  const recent = db.tx.filter(t => t.type !== "T").sort(byNewest).slice(0, 6);
   $("#recent").innerHTML = recent.length ? recent.map(t => txRow(t, true)).join("")
     : `<div class="empty">Ainda sem movimentos. Toca em Despesa para registar o primeiro.</div>`;
   $$("#recent .tx").forEach(e => e.onclick = () => editTx(e.dataset.id));
   $("#seeAll").classList.toggle("hidden", !recent.length);
 }
-$("#toWallet").onclick = () => show("wal");
+$("#toSum").onclick = () => { curMonth = ym(todayISO()); show("sum"); };
 $("#seeAll").onclick = () => { curMonth = ym(todayISO()); show("list"); };
 $("#actD").onclick = () => openSub("add");
 $("#actR").onclick = () => openSub("inc");
-$("#actT").onclick = () => editTransfer(null);
 $("#actM").onclick = () => $("#more").showModal();
 $("#more").onclick = e => {
   const d = $("#more");
@@ -649,7 +645,7 @@ $("#more").onclick = e => {
   d.close();
   const blank = tp => ({type:tp, cents:0, cat:null, method:db.methods[0], note:"", source:""});
   ({quick: () => $("#mkQuick").onclick(), recD: () => editRecurring(null, blank("D")), recR: () => editRecurring(null, blank("R")),
-    goal: () => editGoal(null), debt: () => editDebt(null), set: () => openSub("set")})[b.dataset.more]();
+    wal: () => openSub("wal"), set: () => openSub("set")})[b.dataset.more]();
 };
 
 /* ================= Recorrentes + lembretes ================= */
@@ -793,7 +789,7 @@ $("#delBtn").onclick = () => {
 function editTx(id){
   const t = db.tx.find(x => x.id === id); if (!t) return;
   if (t.type === "R") { iEdit(t); return; }
-  if (t.type === "T") { editTransfer(t); return; }
+  if (t.type === "T") return;
   editingId = id; fCat = t.cat;
   $("#amount").value = cents2str(t.cents);
   $("#date").value = t.date; $("#note").value = t.note || "";
@@ -868,7 +864,7 @@ $("#iDel").onclick = () => {
 /* ================= Movimentos ================= */
 $("#search").oninput = () => renderList();
 function renderList(){
-  let list = monthTx(curMonth);
+  let list = monthTx(curMonth).filter(t => t.type !== "T");
   const lr = sumType(list,"R"), ld = sumType(list,"D");
   $("#listSum").textContent = list.length ? `Entradas ${money(lr)} · Despesas ${money(ld)}` : "";
   const q = $("#search").value.trim().toLowerCase();
@@ -981,21 +977,7 @@ function renderSum(){
 }
 
 /* ================= Carteira ================= */
-function balances(){
-  const b = {}; db.methods.forEach(m => b[m] = db.accInit[m] || 0);
-  for (const t of db.tx) {
-    if (!(t.method in b)) b[t.method] = db.accInit[t.method] || 0;
-    if (t.type === "D") b[t.method] -= t.cents;
-    else if (t.type === "R") b[t.method] += t.cents;
-    else if (t.type === "T") { b[t.method] -= t.cents; if (!(t.to in b)) b[t.to] = 0; b[t.to] += t.cents; }
-  }
-  return b;
-}
 function renderWallet(){
-  const b = balances(), tot = Object.values(b).reduce((a,v)=>a+v,0);
-  $("#accounts").innerHTML = Object.entries(b).map(([m,v]) => `<div class="item"><div class="t">${esc(m)}</div><div class="v ${v<0?"neg":""}">${money(v)}</div></div>`).join("")
-    + `<div class="item total"><div class="t">Total</div><div class="v ${tot<0?"neg":""}">${money(tot)}</div></div>`
-    + (Object.keys(db.accInit).length ? "" : `<p class="hint">Define os saldos iniciais para os valores baterem certo com o banco.</p>`);
   $("#goals").innerHTML = !db.goals.length ? `<p class="hint">Ex.: "Monitor ultrawide, 300 €". Vais pondo dinheiro de parte e vês o progresso.</p>` :
     db.goals.map(g => { const p = g.target ? Math.min(1, g.saved/g.target) : 0;
       return `<div class="item" data-goal="${g.id}"><div class="t"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(g.name)}</span><span class="v">${Math.round(p*100)}%</span></div>
@@ -1008,30 +990,6 @@ function renderWallet(){
   $("#debts").innerHTML = (!db.debts.length ? `<p class="hint">Ex.: "Rui deve-me 12 € do jantar". Toca numa dívida quando for paga.</p>` : "") + sec("Devem-me", owed, "pos") + sec("Eu devo", owe, "neg");
   $$("[data-debt]").forEach(e => e.onclick = () => editDebt(db.debts.find(d => d.id === e.dataset.debt)));
 }
-$("#transfer").onclick = () => editTransfer(null);
-async function editTransfer(t){
-  if (db.methods.length < 2) { toast("Precisas de pelo menos 2 contas"); return; }
-  const out = await ask(t ? "Editar transferência" : "Transferência entre contas", [
-    {k:"from", label:"De", type:"select", options:methodOptions(), value: t ? t.method : db.methods[0]},
-    {k:"to", label:"Para", type:"select", options:methodOptions(), value: t ? t.to : (db.methods.find(m => /dinheiro/i.test(m)) || db.methods[1])},
-    {k:"cents", label:"Valor (€)", type:"money", value: t ? t.cents : ""},
-    {k:"date", label:"Data", type:"date", value: t ? t.date : todayISO()},
-    {k:"note", label:"Nota (opcional)", value: t ? t.note : "", ph:"ex.: levantamento multibanco"},
-  ], {hint:"Não conta como despesa nem entrada, só move dinheiro entre contas.", del: t ? "Apagar transferência" : null,
-      validate: o => !o.cents ? "Escreve um valor" : o.from === o.to ? "Escolhe contas diferentes" : null});
-  if (!out) return;
-  if (out === "delete") db.tx = db.tx.filter(x => x !== t);
-  else { const rec = {date: out.date || todayISO(), cents: out.cents, type:"T", cat:null, method: out.from, to: out.to, note: out.note, source:""};
-    if (t) Object.assign(t, rec); else db.tx.push({id: uid(), ...rec}); toast("Transferência guardada"); }
-  save(); render();
-}
-$("#setInit").onclick = async () => {
-  const out = await ask("Saldos iniciais", db.methods.map(m => ({k:m, label:m, type:"money", value: db.accInit[m] || ""})),
-    {hint:"Quanto tinhas em cada conta antes de começares a usar a app."});
-  if (!out || out === "delete") return;
-  db.accInit = {}; for (const [m,v] of Object.entries(out)) if (v) db.accInit[m] = v;
-  save(); render(); toast("Saldos guardados");
-};
 async function editGoal(g){
   const out = await ask(g ? "Editar meta" : "Nova meta", [
     {k:"name", label:"Nome", value: g ? g.name : "", ph:"ex.: Monitor ultrawide"},
