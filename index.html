@@ -44,7 +44,9 @@ html[data-theme="dark"]{
   color-scheme:dark;
 }
 html[data-theme="dark"] dialog::backdrop{background:rgba(0,0,0,.65)}
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+/* manipulation: sem zoom ao tocar duas vezes (o zoom com dois dedos continua) */
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation}
+html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
 html,body{margin:0; background:var(--bg); color:var(--text); font:15px/1.45 var(--font)}
 b,strong{font-weight:500}
 button{cursor:pointer; transition:background-color .15s var(--ease),color .15s var(--ease),border-color .15s var(--ease),transform .12s var(--ease)}
