@@ -1,4 +1,4 @@
-const CACHE = "jacob-v13";
+const CACHE = "jacob-v14";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable.png", "apple-touch-icon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => {

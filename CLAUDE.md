@@ -32,6 +32,9 @@ App **só para acompanhar os gastos do mês** (e as entradas). Sem transferênci
   quick:     [{id, label, cents, cat, method, note}],   // despesas habituais fixas (Início)
   goals:     [{id, name, emoji, target, saved}],        // metas de poupança (não afetam contas)
   debts:     [{id, person, cents, dir:"owed"|"owe", note, date}],
+  budget:    cêntimos,                           // orçamento do mês (0 = sem)
+  hiddenHab: [habKey, ...],                      // sugestões de habituais escondidas
+  recapSeen: "YYYY-MM",                         // último "fecho do mês" fechado
   accInit:   {...},                              // antigo, já não usado (substituído por bases)
   lastBackup: timestamp|null, since: timestamp
 }
@@ -40,14 +43,16 @@ Tema guardado à parte em `localStorage["gastos.theme"]` = `light` | `dark` | `a
 
 ## Ecrãs e navegação (estilo app de banco)
 Barra de baixo com 3 separadores: **Início · Movimentos · Resumo**. Despesa, Entrada, Metas e dívidas e Definições abrem como páginas por cima, com botão de voltar e sem barra de baixo (`body.sub`). `show(v)` troca de ecrã; `openSub(v)` abre uma página e guarda em `backTo` o separador para onde voltar; `back()` volta.
-- **Início** (`v-home`): gastos do mês em grande (`bigMoney()`), linha com entradas e gastos do mês anterior, botão "Ver resumo", 3 ações redondas (Despesa, Entrada, Mais), **Habituais**, banners e as 6 transações mais recentes. Avatar "J" no canto abre Definições; lupa abre Movimentos com pesquisa.
-- **Habituais** (`renderHabits`, `habits()`): cartões de um toque no Início. Um toque regista a despesa hoje (toast com Anular; toques em menos de 800 ms ignorados). Fixas = `db.quick` (criadas em Mais → Nova despesa habitual, ou "Guardar como habitual" no formulário). Sugeridas = mesma descrição+valor+categoria 3 ou mais vezes nos últimos 90 dias. Cada cartão mostra a última vez ("há 4 dias").
-- **Fundo do Início** (`.glow`): 3 manchas desfocadas a mexer devagar (só transform; parado com reduced-motion). A cor diz o ritmo de gastos vs mês passado até ao mesmo dia: `body[data-mood]` calm (azul/verde-água, abaixo de 90 %), warm (violeta, 90–110 %), hot (laranja/vermelho, acima). Pedido pelo utilizador (estilo Revolut). No Início o cabeçalho é transparente por cima do fundo.
+- **Início** (`v-home`): cabeçalho com avatar "J" (Definições) e barra "Pesquisar" (abre Movimentos). Gastos do mês em grande (`bigMoney()`), linha com entradas e mês anterior, **orçamento do mês** (`#homeBudget`: barra, quanto resta e quanto podes gastar por dia; toque abre `editBudget()`), 3 ações redondas (Despesa, Entrada, Mais), **Habituais** (com "Editar"), banners, **fecho do mês** e as 6 transações mais recentes.
+- **Fecho do mês** (`renderRecap`): nos primeiros 10 dias do mês, cartão "Outubro em números" (total vs mês anterior, categoria com mais gastos, maior despesa, nº de despesas e média por dia) até o utilizador o fechar (`recapSeen`).
+- **Página Habituais** (`v-hab`, `renderHabPage`): fixas com subir/descer e Editar (`editHabit`); sugeridas com Fixar e Esconder; escondidas com Mostrar.
+- **Habituais** (`renderHabits`, `habits()`): cartões de um toque no Início. Um toque regista a despesa hoje (toast com Anular; toques em menos de 800 ms ignorados). Fixas = `db.quick` (criadas em Mais → Nova despesa habitual, ou "Guardar como habitual" no formulário). Sugeridas = mesma descrição+valor+categoria 3 ou mais vezes nos últimos 90 dias, exceto as de `hiddenHab`. Cada cartão mostra a última vez ("há 4 dias").
+- **Fundo do Início** (`.glow`): 3 manchas desfocadas a mexer devagar (só transform; parado com reduced-motion). A cor diz o ritmo de gastos face ao orçamento do mês (ou ao mês passado, se não houver orçamento) até ao mesmo dia: `body[data-mood]` calm (azul/verde-água, abaixo de 90 %), warm (violeta, 90–110 %), hot (laranja/vermelho, acima). Pedido pelo utilizador (estilo Revolut). No Início o cabeçalho é transparente por cima do fundo.
 - **Mais** (`#more`, folha que sobe de baixo): nova despesa habitual, despesa/entrada recorrente, Contas e saldos, Metas e dívidas, Definições.
 - **Contas e saldos** (`v-acc`): saldo base por conta (o que o banco mostra no momento). `accBalance()` = base + entradas − despesas dessa conta registadas depois da base (mesmo dia conta só se o movimento foi criado depois, via `createdAt(id)`). Botão Acertar compara com o saldo real e pode trocar a base. Lista os movimentos com nomes de conta antigos (MB Way, Cartão de débito…) para o utilizador escolher a conta; nunca mapear automaticamente sem ele escolher.
 - **Despesa** (`v-add`) / **Entrada** (`v-inc`): seletor Despesa|Entrada no topo, valor grande, categoria (chips), data, conta, descrição. Guardar volta ao separador de origem. Alerta de orçamento a 80 % e ao exceder (`budgetAlert`).
-- **Movimentos** (`v-list`): mês, pesquisa, totais do mês numa linha, lista agrupada por dia. Tocar para editar.
-- **Resumo** (`v-sum`): gastos do mês em grande com comparação e previsão, entradas e saldo do mês, últimos 6 meses (gráfico principal), categorias (barra de partilha + linhas com orçamento), entradas por fonte (`renderSrc`), saldo acumulado no ano.
+- **Movimentos** (`v-list`): mês, pesquisa, chips de categoria (`listCat`), totais numa linha, lista agrupada por dia. Tocar para editar.
+- **Resumo** (`v-sum`): gastos do mês em grande com comparação, previsão e orçamento; tocar numa barra dos 6 meses muda de mês; tocar numa categoria abre os Movimentos filtrados; entradas e saldo do mês, últimos 6 meses (gráfico principal), categorias (barra de partilha + linhas com orçamento), entradas por fonte (`renderSrc`), saldo acumulado no ano.
 - **Metas e dívidas** (`v-wal`, página aberta em Mais): metas de poupança e dívidas (devem-me / eu devo).
 - **Removido a pedido do utilizador:** transferências e o saldo total no Início. Os dados antigos (`tx` do tipo `T`, `accInit`) ficam guardados mas não aparecem; não voltar a pôr sem ele pedir.
 - **Definições** (`v-set`): aparência, recorrentes, habituais, categorias e orçamentos, contas, cópias de segurança (JSON e CSV, ficheiros `jacob-…`), apagar tudo.
@@ -56,6 +61,7 @@ Barra de baixo com 3 separadores: **Início · Movimentos · Resumo**. Despesa, 
 - Nome visível da app: **Jacob**. As chaves `localStorage` `gastos.v1` e `gastos.theme` ficam com o nome antigo de propósito (mudá-las perdia os dados).
 
 ## Visual
+- Inspiração: Revolut (pedido do utilizador). Títulos dos separadores a 28px/700; linhas de movimentos a toda a largura do cartão com separador a começar depois do avatar; resposta visual ao toque (`:active`); ecrãs entram com fade (separadores) ou deslizam da direita (páginas); valores com separador de milhares (`useGrouping:"always"`).
 - Claro: variáveis em `:root`. Escuro **"Grafite"** (escolhido pelo utilizador): `html[data-theme="dark"]` — fundo `#121417`, cartões `#1c1f24` com contorno `#2a2f36`, destaque azul `#4c8dff`, vermelho `#ff6161` despesas, verde `#38c98a` entradas.
 - `applyTheme()` corre no `<head>` para evitar flash.
 

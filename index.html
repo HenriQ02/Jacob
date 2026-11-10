@@ -60,7 +60,7 @@ button:active{transform:scale(.97)}
 header{position:sticky; top:0; z-index:5; background:var(--bg);
   padding:calc(env(safe-area-inset-top) + 12px) 16px 8px; display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:60px}
 header .hl{display:flex; align-items:center; gap:8px; min-width:0}
-header h1{font-size:24px; line-height:1.15; font-weight:600; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+header h1{font-size:28px; line-height:1.15; font-weight:700; letter-spacing:-.01em; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 body.sub header h1{font-size:18px}
 .hdrbtn{border:0; background:var(--raised); color:var(--text); width:40px; height:40px; border-radius:50%; display:grid; place-items:center; padding:0; flex:none}
 .hdrbtn .i{width:20px; height:20px}
@@ -178,17 +178,76 @@ body.home .hdrbtn, body.home .me{background:color-mix(in srgb,var(--card) 55%,tr
 .hab.add{justify-content:center; align-items:center; gap:8px; border-style:dashed; background:transparent; box-shadow:none; color:var(--text-2); font-size:13px}
 .hab.add .c{width:32px; height:32px; border-radius:50%; background:var(--raised); display:grid; place-items:center}
 
+/* ---------- Cabeçalho do Início: avatar + pesquisa (como no Revolut) ---------- */
+.searchpill{flex:1; display:flex; align-items:center; gap:8px; height:40px; margin-left:4px; padding:0 14px; border:0; border-radius:20px; font:inherit; font-size:15px; color:var(--muted); text-align:left;
+  background:color-mix(in srgb,var(--card) 55%,transparent); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px)}
+.searchpill .i{width:18px; height:18px}
+body:not(.home) .searchpill{display:none}
+header .hl{flex:none}
+body.home header .hl{flex:none}
+
+/* ---------- Orçamento no Início ---------- */
+.budget{display:block; width:min(280px,80%); margin:4px auto 0; padding:8px 0; border:0; background:none; color:inherit; font:inherit; text-align:center}
+.bbar{height:6px; border-radius:3px; background:color-mix(in srgb,var(--text) 12%,transparent); overflow:hidden}
+.bbar i{display:block; height:100%; border-radius:3px; background:var(--accent)}
+.bbar i.warn{background:var(--amber)} .bbar i.over{background:var(--red)}
+.btxt{margin-top:8px; font-size:13px; color:var(--text-2)}
+.btxt b{color:var(--text); font-weight:600}
+
+/* ---------- Fecho do mês ---------- */
+.recap .cardhead small{font-size:12px; color:var(--muted)}
+.recap .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0 4px}
+.recap .grid div{background:var(--raised); border-radius:14px; padding:12px}
+.recap .grid small{display:block; font-size:12px; color:var(--muted)}
+.recap .grid b{display:block; font-size:16px; font-weight:600; margin-top:2px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.recap .grid span{display:block; font-size:12px; color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.xbtn{border:0; background:var(--raised); color:var(--text-2); width:28px; height:28px; border-radius:50%; display:grid; place-items:center; padding:0}
+.xbtn .i{width:14px; height:14px}
+
+/* ---------- Filtros dos movimentos ---------- */
+.fchips{display:flex; gap:8px; overflow-x:auto; margin:8px -16px 0; padding:0 16px 4px; scrollbar-width:none}
+.fchips::-webkit-scrollbar{display:none}
+.fchip{flex:none; display:flex; align-items:center; gap:6px; height:34px; padding:0 14px; border-radius:17px; border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; font-size:14px}
+.fchip.on{background:var(--text); color:var(--bg); border-color:transparent}
+.fchip .dot{width:8px; height:8px}
+
+/* ---------- Página Habituais ---------- */
+.hrow{display:flex; align-items:center; gap:12px; min-height:60px; padding:8px 0}
+.hrow + .hrow{border-top:1px solid var(--line)}
+.hrow .n{flex:1; min-width:0}
+.hrow .n div{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hrow .n small{display:block; font-size:13px; color:var(--muted)}
+.hrow .acts{display:flex; gap:4px}
+.ibtn{border:0; background:var(--raised); color:var(--text-2); width:32px; height:32px; border-radius:50%; display:grid; place-items:center; padding:0}
+.ibtn .i{width:16px; height:16px}
+.ibtn:disabled{opacity:.35}
+
+/* ---------- Toques: resposta visual (como numa app nativa) ---------- */
+.tx, .catline[data-cat], .hab, .sheet .row, .budget{-webkit-user-select:none; user-select:none}
+.tx:active, .catline[data-cat]:active, .sheet .row:active{background:color-mix(in srgb,var(--text) 6%,transparent)}
+.hab:active{transform:scale(.97)}
+.catline[data-cat]{cursor:pointer; margin:0 -16px; padding-left:16px; padding-right:16px}
+.hist div{cursor:pointer}
+
+/* ---------- Entrada de ecrãs ---------- */
+main > section:not(.hidden){animation:enter .28s var(--ease)}
+body.sub main > section:not(.hidden){animation:slidein .3s var(--ease)}
+@keyframes enter{from{opacity:0; transform:translateY(6px)}}
+@keyframes slidein{from{opacity:0; transform:translateX(18px)}}
+@media (prefers-reduced-motion: reduce){main > section:not(.hidden){animation:none!important}}
+
 /* ---------- Linhas de movimentos ---------- */
 .av{width:40px; height:40px; border-radius:50%; flex:none; display:grid; place-items:center; font-size:16px; font-weight:600;
   color:var(--c,var(--muted)); background:color-mix(in srgb,var(--c,var(--muted)) 16%,transparent)}
 .av .i{width:18px; height:18px}
-.tx{display:flex; align-items:center; gap:12px; min-height:64px; padding:12px 0}
-.tx + .tx{border-top:1px solid var(--line)}
+.tx{position:relative; display:flex; align-items:center; gap:12px; min-height:64px; margin:0 -16px; padding:12px 16px}
+.tx + .tx::before{content:""; position:absolute; top:0; left:68px; right:16px; border-top:1px solid var(--line)}
 .tx .t{flex:1; min-width:0}
 .tx .t > div{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .tx .t small{color:var(--muted); font-size:13px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .v{font-size:15px; font-weight:500; white-space:nowrap}
-.day{font-size:13px; line-height:16px; color:var(--muted); margin:20px 4px 8px; display:flex; justify-content:space-between}
+.day{font-size:13px; line-height:16px; font-weight:500; color:var(--text-2); margin:20px 4px 8px; display:flex; justify-content:space-between}
+.day .num{font-weight:400; color:var(--muted)}
 .group{background:var(--card); border:1px solid var(--line); border-radius:20px; padding:0 16px; box-shadow:var(--shadow)}
 .monthnav{display:flex; align-items:center; justify-content:space-between; margin:4px 0 12px}
 .monthnav button{border:0; background:var(--raised); color:var(--text); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; padding:0}
@@ -289,7 +348,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     <button class="me" id="me" aria-label="Definições">J</button>
     <h1 id="title"></h1>
   </div>
-  <button class="hdrbtn" id="hdrSearch" aria-label="Pesquisar movimentos"><span data-i="search"></span></button>
+  <button class="searchpill" id="hdrSearch" aria-label="Pesquisar movimentos"><span data-i="search"></span>Pesquisar</button>
 </header>
 
 <main>
@@ -299,16 +358,17 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
       <small id="homeLbl">Gastos este mês</small>
       <div class="bal" id="homeBal"></div>
       <div class="sub" id="homeSub"></div>
-      <button class="pill" id="toSum">Ver resumo<span data-i="right"></span></button>
+      <button class="budget" id="homeBudget" aria-label="Orçamento do mês"></button>
     </div>
     <div class="actions">
       <button class="act pri" id="actD"><span class="c"><span data-i="minus"></span></span>Despesa</button>
       <button class="act" id="actR"><span class="c"><span data-i="plus"></span></span>Entrada</button>
       <button class="act" id="actM"><span class="c"><span data-i="more"></span></span>Mais</button>
     </div>
-    <div class="habhead"><h2>Habituais</h2><small>um toque regista hoje</small></div>
+    <div class="habhead"><h2>Habituais</h2><button class="link" id="habEdit">Editar</button></div>
     <div class="habits" id="habits"></div>
     <div id="banners"></div>
+    <div class="card recap hidden" id="recap"></div>
     <div class="card">
       <div class="cardhead"><h2>Transações recentes</h2><button class="link" id="seeAll">Ver tudo</button></div>
       <div id="recent"></div>
@@ -357,6 +417,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
   <section id="v-list" class="hidden">
     <div class="monthnav"><button data-m="-1" aria-label="Mês anterior"><span data-i="left"></span></button><b class="mlabel"></b><button data-m="1" aria-label="Mês seguinte"><span data-i="right"></span></button></div>
     <input class="search" id="search" type="search" placeholder="Pesquisar" autocomplete="off">
+    <div class="fchips" id="fchips"></div>
     <div class="listsum" id="listSum"></div>
     <div id="txList"></div>
   </section>
@@ -369,6 +430,13 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     <div class="card"><h2>Por categoria</h2><div id="donut"></div><div id="catSum"></div></div>
     <div class="card"><h2>Entradas por fonte</h2><div id="srcSum"></div></div>
     <div class="card"><h2 id="balTitle">Saldo acumulado no ano</h2><div id="balLine"></div></div>
+  </section>
+
+  <!-- HABITUAIS -->
+  <section id="v-hab" class="hidden">
+    <div class="card"><div class="cardhead"><h2>As tuas</h2><button class="mini" id="habNew"><span data-i="plus"></span>Nova</button></div><div id="habFixed"></div></div>
+    <div class="card"><h2>Sugeridas</h2><p class="hint">Despesas que repetiste 3 vezes ou mais nos últimos 90 dias.</p><div id="habSug"></div></div>
+    <div class="card hidden" id="habHidCard"><h2>Escondidas</h2><div id="habHid"></div></div>
   </section>
 
   <!-- CONTAS E SALDOS -->
@@ -405,8 +473,12 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
       </div>
       <p class="hint" style="margin:12px 0 0">Auto segue o modo do telemóvel.</p>
     </div>
+    <div class="card">
+      <div class="cardhead"><h2>Orçamento do mês</h2><button class="mini" id="setBudget">Alterar</button></div>
+      <p class="hint" id="budgetInfo" style="margin:4px 0 0"></p>
+    </div>
     <div class="card"><h2>Recorrentes</h2><p class="hint">Aparecem no Início para confirmares, no dia escolhido de cada mês.</p><div id="recList"></div></div>
-    <div class="card"><h2>Habituais</h2><p class="hint">As que crias ficam sempre no Início. A app também sugere sozinha as despesas que repetes (3 vezes ou mais nos últimos 90 dias).</p><div id="quickList"></div></div>
+    <div class="card"><div class="cardhead"><h2>Habituais</h2><button class="mini" id="setHab">Gerir</button></div><p class="hint" style="margin:4px 0 0">Despesas de um toque no Início: as que crias e as que a app sugere.</p></div>
     <div class="card">
       <h2>Categorias de despesa</h2><div id="catsD"></div>
       <button class="btn sec small" data-addcat="D">Nova categoria de despesa</button>
@@ -487,6 +559,9 @@ function migrate(d){
   if (from < 3) d.methods = [...ACCOUNTS];
   // saldo base por conta: {cents, date:"YYYY-MM-DD", at: timestamp de quando foi definido}
   if (!d.bases || typeof d.bases !== "object") d.bases = {};
+  if (typeof d.budget !== "number") d.budget = 0;          // orçamento do mês (cêntimos, 0 = sem)
+  if (!Array.isArray(d.hiddenHab)) d.hiddenHab = [];       // sugestões de habituais escondidas (habKey)
+  if (typeof d.recapSeen !== "string") d.recapSeen = "";  // último "fecho do mês" fechado ("YYYY-MM")
   d.version = 3;
   if (!("lastBackup" in d)) d.lastBackup = null;
   if (!d.since) d.since = Date.now();
@@ -508,7 +583,7 @@ if (navigator.storage && navigator.storage.persist) navigator.storage.persist().
 /* ================= Utilitários ================= */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
-const fmt = new Intl.NumberFormat("pt-PT", {style:"currency", currency:"EUR"});
+let fmt; try { fmt = new Intl.NumberFormat("pt-PT", {style:"currency", currency:"EUR", useGrouping:"always"}); } catch(e){ fmt = new Intl.NumberFormat("pt-PT", {style:"currency", currency:"EUR"}); }
 const money = c => fmt.format((c||0)/100);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const pad = n => String(n).padStart(2,"0");
@@ -594,6 +669,8 @@ const ICONS = {
   right:'<path d="m9 18 6-6-6-6"/>',
   swap:'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
   plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  up:'<path d="m18 15-6-6-6 6"/>',
+  down:'<path d="m6 9 6 6 6-6"/>',
   repeat:'<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
   zap:'<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>',
   home:'<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
@@ -646,7 +723,7 @@ const methodOptions = () => db.methods.map(m => [m,m]);
 
 /* ================= Navegação ================= */
 // separadores (barra de baixo) e páginas que abrem por cima com botão de voltar
-const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", acc:"Contas e saldos", wal:"Metas e dívidas", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
+const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", acc:"Contas e saldos", hab:"Habituais", wal:"Metas e dívidas", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
 const TABS = ["home","list","sum"];
 let view = "home", backTo = "home";
 function show(v){
@@ -678,7 +755,7 @@ $$(".kind button").forEach(b => b.onclick = () => { if (b.dataset.kind !== view)
 function render(){
   $$(".mlabel").forEach(e => e.textContent = monthLabel(curMonth));
   renderBanners();
-  ({home:renderHome, add:renderForm, inc:renderInc, list:renderList, sum:renderSum, wal:renderWallet, acc:renderAcc, set:renderSet})[view]();
+  ({home:renderHome, add:renderForm, inc:renderInc, list:renderList, sum:renderSum, wal:renderWallet, acc:renderAcc, hab:renderHabPage, set:renderSet})[view]();
 }
 
 /* ================= Início ================= */
@@ -692,10 +769,19 @@ function renderHome(){
   if (pd) bits.push(`em ${MONTHS[+pm.slice(5)-1]} gastaste ${money(pd)}`);
   const s = bits.join(" · ");
   $("#homeSub").textContent = s ? s[0].toUpperCase() + s.slice(1) : "";
-  // cor do fundo: ritmo de gastos comparado com o mês passado até ao mesmo dia
-  const day = +todayISO().slice(8), pace = pd && d ? d / (pd * day / daysIn(m)) : 0;
+  const day = +todayISO().slice(8), dim = daysIn(m);
+  // orçamento do mês: barra e quanto ainda podes gastar por dia
+  const B = db.budget;
+  if (B) {
+    const left = B - d, p = d / B, daysLeft = dim - day + 1;
+    $("#homeBudget").innerHTML = `<div class="bbar"><i class="${p>1?"over":p>=.8?"warn":""}" style="width:${Math.min(100,p*100)}%"></i></div>
+      <div class="btxt">${left >= 0 ? `Restam <b>${money(left)}</b> de ${money(B)} · <b>${money(Math.floor(left/daysLeft))}</b> por dia` : `Passaste o orçamento em <b>${money(-left)}</b>`}</div>`;
+  } else $("#homeBudget").innerHTML = `<span class="link">Definir orçamento do mês</span>`;
+  // cor do fundo: ritmo de gastos face ao orçamento (ou ao mês passado, se não houver orçamento)
+  const ref = B || pd, pace = ref && d ? d / (ref * day / dim) : 0;
   document.body.dataset.mood = pace > 1.1 ? "hot" : pace > 0.9 ? "warm" : "calm";
   renderHabits();
+  renderRecap();
   // as transferências antigas ficam guardadas, mas já não aparecem
   const recent = db.tx.filter(t => t.type !== "T").sort(byNewest).slice(0, 6);
   $("#recent").innerHTML = recent.length ? recent.map(t => txRow(t, true)).join("")
@@ -721,8 +807,8 @@ function habits(){
   const fixed = db.quick.map(q => { const g = seen[habKey(q.note || q.label, q.cents, q.cat)];
     return {...q, method: okMethod(q.method), last: g ? g.last : "", fixed: true}; });
   const fixedKeys = new Set(db.quick.map(q => habKey(q.note || q.label, q.cents, q.cat)));
-  const sug = Object.entries(seen).filter(([k, g]) => g.n >= 3 && !fixedKeys.has(k))
-    .sort((a, b) => b[1].n - a[1].n).slice(0, 8).map(([, g]) => ({...g, method: okMethod(g.method)}));
+  const sug = Object.entries(seen).filter(([k, g]) => g.n >= 3 && !fixedKeys.has(k) && !db.hiddenHab.includes(k))
+    .sort((a, b) => b[1].n - a[1].n).slice(0, 8).map(([k, g]) => ({...g, key: k, method: okMethod(g.method)}));
   return [...fixed, ...sug];
 }
 function lastTxt(iso){
@@ -740,6 +826,46 @@ function renderHabits(){
   $$("#habits [data-h]").forEach(b => b.onclick = () => useHabit(habList[+b.dataset.h]));
   $("#habAdd").onclick = () => $("#mkQuick").onclick();
 }
+/* ---------- Página Habituais: editar, ordenar, fixar e esconder ---------- */
+function renderHabPage(){
+  const all = habits(), fixed = all.filter(x => x.fixed), sug = all.filter(x => !x.fixed);
+  $("#habFixed").innerHTML = fixed.length ? fixed.map((q, i) => { const c = catById(q.cat) || NOCAT;
+    return `<div class="hrow">${avatar(c, q.label)}<div class="n"><div>${esc(q.label)}</div><small>${money(q.cents)} · ${esc(q.method)}</small></div>
+      <div class="acts"><button class="ibtn" data-up="${i}" aria-label="Subir" ${i===0?"disabled":""}>${icon("up")}</button><button class="ibtn" data-dn="${i}" aria-label="Descer" ${i===fixed.length-1?"disabled":""}>${icon("down")}</button><button class="mini" data-qe="${q.id}">Editar</button></div></div>`; }).join("")
+    : `<p class="hint" style="margin:0">Ainda não criaste nenhuma.</p>`;
+  $("#habSug").innerHTML = sug.length ? sug.map(x => { const c = catById(x.cat) || NOCAT;
+    return `<div class="hrow">${avatar(c, x.label)}<div class="n"><div>${esc(x.label)}</div><small>${money(x.cents)} · ${x.n}× em 90 dias</small></div>
+      <div class="acts"><button class="mini" data-fix="${esc(x.key)}">Fixar</button><button class="mini" data-hide="${esc(x.key)}">Esconder</button></div></div>`; }).join("")
+    : `<p class="hint" style="margin:0">Sem sugestões por agora.</p>`;
+  $("#habHidCard").classList.toggle("hidden", !db.hiddenHab.length);
+  $("#habHid").innerHTML = db.hiddenHab.map(k => { const [label, cents] = k.split("|");
+    return `<div class="hrow"><div class="n"><div>${esc(label)}</div><small>${money(+cents)}</small></div><div class="acts"><button class="mini" data-unhide="${esc(k)}">Mostrar</button></div></div>`; }).join("");
+  const move = (i, dir) => { const q = db.quick; [q[i], q[i+dir]] = [q[i+dir], q[i]]; save(); renderHabPage(); };
+  $$("[data-up]").forEach(b => b.onclick = () => move(+b.dataset.up, -1));
+  $$("[data-dn]").forEach(b => b.onclick = () => move(+b.dataset.dn, 1));
+  $$("[data-qe]").forEach(b => b.onclick = () => editHabit(db.quick.find(q => q.id === b.dataset.qe)));
+  $$("[data-fix]").forEach(b => b.onclick = () => { const x = sug.find(s => s.key === b.dataset.fix); if (!x) return;
+    db.quick.push({id: uid(), label: x.label, cents: x.cents, cat: x.cat, method: x.method, note: x.note || x.label}); save(); renderHabPage(); toast("Fixada no Início"); });
+  $$("[data-hide]").forEach(b => b.onclick = () => { db.hiddenHab.push(b.dataset.hide); save(); renderHabPage(); toast("Sugestão escondida"); });
+  $$("[data-unhide]").forEach(b => b.onclick = () => { db.hiddenHab = db.hiddenHab.filter(k => k !== b.dataset.unhide); save(); renderHabPage(); });
+}
+async function editHabit(q){
+  if (!q) return;
+  const out = await ask("Editar habitual", [
+    {k:"label", label:"Nome", value:q.label},
+    {k:"cents", label:"Valor (€)", type:"money", value:q.cents},
+    {k:"cat", label:"Categoria", type:"select", options:catOptions("D"), value:q.cat},
+    {k:"method", label:"Conta", type:"select", options:methodOptions(), value:q.method},
+  ], {del:"Apagar habitual", validate: o => !o.label ? "Dá-lhe um nome" : !o.cents ? "Escreve um valor" : null});
+  if (!out) return;
+  if (out === "delete") db.quick = db.quick.filter(x => x !== q);
+  else Object.assign(q, {label: out.label, note: out.label, cents: out.cents, cat: out.cat, method: out.method});
+  save(); render(); toast(out === "delete" ? "Habitual apagada" : "Habitual atualizada");
+}
+$("#habNew").onclick = () => $("#mkQuick").onclick();
+$("#setHab").onclick = () => openSub("hab");
+$("#setBudget").onclick = editBudget;
+
 function useHabit(x){
   if (!x || Date.now() - habLock < 800) return;   // evita registar duas vezes com um toque duplo
   habLock = Date.now();
@@ -749,7 +875,39 @@ function useHabit(x){
   if (!budgetAlert._shown) toast(`${x.label}: ${money(x.cents)} registado`, {action:"Anular", ms:4000,
     onAction: () => { db.tx = db.tx.filter(y => y.id !== t.id); save(); render(); toast("Anulado"); }});
 }
-$("#toSum").onclick = () => { curMonth = ym(todayISO()); show("sum"); };
+$("#homeBudget").onclick = editBudget;
+$("#habEdit").onclick = () => openSub("hab");
+async function editBudget(){
+  const out = await ask("Orçamento do mês", [{k:"cents", label:"Quanto queres gastar por mês, no total (€)", type:"money", value: db.budget || ""}],
+    {hint:"No Início vês quanto falta e quanto podes gastar por dia.", del: db.budget ? "Tirar orçamento" : null,
+     validate: o => !o.cents ? "Escreve um valor" : null});
+  if (!out) return;
+  db.budget = out === "delete" ? 0 : out.cents; save(); render();
+  toast(db.budget ? "Orçamento guardado" : "Orçamento tirado");
+}
+/* ---------- Fecho do mês: aparece nos primeiros 10 dias, até o fechares ---------- */
+function renderRecap(){
+  const box = $("#recap"), m = ym(todayISO()), pm = shiftMonth(m, -1), ppm = shiftMonth(pm, -1);
+  const l = monthTx(pm).filter(t => t.type === "D");
+  if (+todayISO().slice(8) > 10 || db.recapSeen === pm || !l.length) { box.classList.add("hidden"); return; }
+  const tot = l.reduce((a,t)=>a+t.cents,0), prev = sumType(monthTx(ppm),"D");
+  const byCat = {}; l.forEach(t => byCat[t.cat] = (byCat[t.cat]||0) + t.cents);
+  const [topId, topV] = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+  const big = [...l].sort((a,b)=>b.cents-a.cents)[0], bc = catById(big.cat) || NOCAT;
+  const delta = prev ? Math.round((tot-prev)/prev*100) : null;
+  const mname = MONTHS[+pm.slice(5)-1], mcap = mname[0].toUpperCase() + mname.slice(1);
+  box.innerHTML = `<div class="cardhead"><h2>${mcap} em números</h2><button class="xbtn" id="recapX" aria-label="Fechar">${icon("x")}</button></div>
+    <div class="grid">
+      <div><small>Total gasto</small><b>${money(tot)}</b><span>${delta == null ? "primeiro mês" : delta === 0 ? "igual a " + MONTHS[+ppm.slice(5)-1] : `${delta>0?"+":""}${delta}% vs ${MONTHS[+ppm.slice(5)-1]}`}</span></div>
+      <div><small>Onde mais gastaste</small><b>${esc((catById(topId)||NOCAT).name)}</b><span>${money(topV)} · ${Math.round(topV/tot*100)}%</span></div>
+      <div><small>Maior despesa</small><b>${money(big.cents)}</b><span>${esc(big.note || bc.name)} · ${relDay(big.date)}</span></div>
+      <div><small>Despesas</small><b>${l.length}</b><span>${money(Math.round(tot/daysIn(pm)))} por dia</span></div>
+    </div>
+    <button class="btn sec small" id="recapSee">Ver resumo de ${mname}</button>`;
+  box.classList.remove("hidden");
+  $("#recapX").onclick = () => { db.recapSeen = pm; save(); render(); };
+  $("#recapSee").onclick = () => { curMonth = pm; show("sum"); };
+}
 $("#seeAll").onclick = () => { curMonth = ym(todayISO()); show("list"); };
 $("#actD").onclick = () => openSub("add");
 $("#actR").onclick = () => openSub("inc");
@@ -967,10 +1125,20 @@ $("#iDel").onclick = () => {
 
 /* ================= Movimentos ================= */
 $("#search").oninput = () => renderList();
+let listCat = null;   // categoria escolhida nos chips (ou ao tocar numa categoria do Resumo)
 function renderList(){
   let list = monthTx(curMonth).filter(t => t.type !== "T");
+  // chips: categorias com movimentos neste mês, as mais usadas primeiro
+  const cnt = {}; list.forEach(t => cnt[t.cat] = (cnt[t.cat]||0) + 1);
+  if (listCat && !cnt[listCat]) cnt[listCat] = 0;
+  const ids = Object.keys(cnt).filter(id => catById(id)).sort((a,b) => cnt[b]-cnt[a]);
+  $("#fchips").innerHTML = `<button class="fchip ${!listCat?"on":""}" data-fc="">Todas</button>` +
+    ids.map(id => { const c = catById(id); return `<button class="fchip ${listCat===id?"on":""}" data-fc="${id}">${dot(c)}${esc(c.name)}</button>`; }).join("");
+  $("#fchips").classList.toggle("hidden", !ids.length);
+  $$("#fchips [data-fc]").forEach(b => b.onclick = () => { listCat = b.dataset.fc || null; renderList(); });
+  if (listCat) list = list.filter(t => t.cat === listCat);
   const lr = sumType(list,"R"), ld = sumType(list,"D");
-  $("#listSum").textContent = list.length ? `Entradas ${money(lr)} · Despesas ${money(ld)}` : "";
+  $("#listSum").textContent = !list.length ? "" : listCat ? `${list.length} movimento${list.length>1?"s":""} · ${money(ld + lr)}` : `Entradas ${money(lr)} · Despesas ${money(ld)}`;
   const q = $("#search").value.trim().toLowerCase();
   if (q) list = list.filter(t => ((t.note||"")+" "+(t.source||"")+" "+(catById(t.cat)?.name||"")+" "+t.method+" "+(t.to||"")).toLowerCase().includes(q));
   list.sort(byNewest);
@@ -1018,7 +1186,7 @@ function renderSum(){
     fc = `<div class="meta">Previsão até ao fim do mês: ~${money(proj)}${pendingRec?`, com ${money(pendingRec)} de recorrentes`:""}</div>`;
   }
   $("#sumHero").innerHTML = `<small class="lbl">Gastos em ${MONTHS[+curMonth.slice(5)-1]}</small><div class="big">${bigMoney(totSpent)}</div>
-    <div class="meta">${meta}</div>${fc}
+    <div class="meta">${meta}</div>${fc}${db.budget ? `<div class="meta">Orçamento: ${money(db.budget)} · ${totSpent > db.budget ? "passaste " + money(totSpent - db.budget) : "restam " + money(db.budget - totSpent)}</div>` : ""}
     <div class="stats"><div><small>Entradas</small><b class="pos">${money(totR)}</b></div><div><small>Saldo do mês</small><b class="${totR-totSpent<0?"neg":""}">${money(totR-totSpent)}</b></div></div>`;
 
   // donut
@@ -1030,7 +1198,7 @@ function renderSum(){
   let html = "";
   if (totBudget) {
     const p = totBSpent/totBudget;
-    html += `<div class="catline lead"><div class="body"><div class="top"><span>Orçamento do mês</span><span><span class="v">${money(totBSpent)}</span> <small>/ ${money(totBudget)}</small></span></div>
+    html += `<div class="catline lead"><div class="body"><div class="top"><span>Categorias com orçamento</span><span><span class="v">${money(totBSpent)}</span> <small>/ ${money(totBudget)}</small></span></div>
       <div class="bar"><i class="${p>1?"over":p>=.8?"warn":"acc"}" style="width:${Math.min(100,p*100)}%"></i></div>
       <small>${p>1?"Excedeste o orçamento em "+money(totBSpent-totBudget):"Restam "+money(totBudget-totBSpent)}</small></div></div>`;
   }
@@ -1044,21 +1212,23 @@ function renderSum(){
     else if (s) delta = `<span class="delta hint">novo</span>`;
     const cls = b ? (p>1 ? "over" : p>=.8 ? "warn" : "acc") : "";
     const info = [s && totSpent ? Math.round(s/totSpent*100) + "% dos gastos" : "", b ? (p>1 ? "+"+money(s-b)+" acima do orçamento" : Math.round(p*100)+"% do orçamento") : ""].filter(Boolean).join(" · ");
-    html += `<div class="catline">${avatar(c)}<div class="body"><div class="top"><span>${esc(c.name)}</span>
+    html += `<div class="catline" data-cat="${id}">${avatar(c)}<div class="body"><div class="top"><span>${esc(c.name)}</span>
       <span><span class="v">${money(s)}</span>${b?` <small>/ ${money(b)}</small>`:""}</span></div>
       ${b ? `<div class="bar"><i class="${cls}" style="width:${Math.min(100,p*100)}%"></i></div>` : ""}
       <small class="${b&&p>1?"neg":""}">${info}</small>${delta}</div></div>`;
   }
   $("#catSum").innerHTML = html;
+  $$("#catSum [data-cat]").forEach(e => e.onclick = () => { if (e.dataset.cat === "?") return; listCat = e.dataset.cat; $("#search").value = ""; show("list"); });
   renderSrc();
 
   // histórico 6 meses
   const months = []; for (let i=5;i>=0;i--) months.push(shiftMonth(curMonth,-i));
   const vals = months.map(m => sumType(monthTx(m),"D"));
   const hm = Math.max(1, ...vals);
-  $("#hist").innerHTML = months.map((m,i) => `<div class="${m===curMonth?"cur":""}">
+  $("#hist").innerHTML = months.map((m,i) => `<div class="${m===curMonth?"cur":""}" data-hm="${m}">
       <span>${vals[i]?Math.round(vals[i]/100)+" €":""}</span>
       <span class="b" style="height:${vals[i]/hm*76}%"></span>${mshort(m)}</div>`).join("");
+  $$("#hist [data-hm]").forEach(e => e.onclick = () => { curMonth = e.dataset.hm; render(); });
 
   // saldo acumulado no ano
   const y = curMonth.slice(0,4);
@@ -1205,9 +1375,7 @@ function renderSet(){
     + `<div class="row2"><button class="btn sec small" data-newrec="D">Despesa recorrente</button><button class="btn sec small" data-newrec="R">Entrada recorrente</button></div>`;
   $$("[data-rec]").forEach(b => b.onclick = () => editRecurring(db.recurring.find(r => r.id === b.dataset.rec)));
   $$("[data-newrec]").forEach(b => b.onclick = () => editRecurring(null, {type:b.dataset.newrec, cents:0, cat:null, method:db.methods[0], note:"", source:""}));
-  $("#quickList").innerHTML = (db.quick.map(q => { const c = catById(q.cat) || NOCAT;
-    return `<div class="setcat">${dot(c)}<div class="n">${esc(q.label)}<br><small><span class="num">${money(q.cents)}</span> · ${esc(q.method)}</small></div><button data-qdel="${q.id}">Apagar</button></div>`; }).join("")) || `<p class="hint" style="margin:0">Ainda não tens nenhum.</p>`;
-  $$("[data-qdel]").forEach(b => b.onclick = () => { db.quick = db.quick.filter(q => q.id !== b.dataset.qdel); save(); renderSet(); });
+  $("#budgetInfo").textContent = db.budget ? `${money(db.budget)} por mês` : "Sem orçamento. Define um valor para veres no Início quanto ainda podes gastar.";
   $("#methodsInput").value = db.methods.join(", ");
   const kb = Math.max(1, Math.round((localStorage.getItem(KEY)||"").length / 1024));
   $("#storeInfo").textContent = `${db.tx.length} movimentos · ocupam ~${kb} KB. ${db.lastBackup ? "Última cópia: " + new Date(db.lastBackup).toLocaleDateString("pt-PT") : "Ainda sem cópias."}`;
