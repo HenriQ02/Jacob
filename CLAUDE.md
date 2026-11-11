@@ -1,6 +1,6 @@
 # Jacob — app pessoal de controlo de gastos
 
-App **só para acompanhar os gastos do mês** (e as entradas). Sem transferências (o utilizador pediu explicitamente). Há saldos por conta só para comparar com o banco. PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (Partilhar → Adicionar ao ecrã principal). Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
+App **só para acompanhar os gastos do mês** (e as entradas). Sem transferências (o utilizador pediu explicitamente). Há saldos por conta só para comparar com o banco. PWA (web app instalável) para o **iPhone** do Henrique, instalada pelo Safari (Partilhar → Adicionar ao ecrã principal). Também usada pela namorada num **Android** (instalada pelo Chrome, ⋮ → Instalar app); cada telemóvel tem os seus próprios dados. Não fazer nada específico do Henrique sem ser configurável. Publicada em **https://henriq02.github.io/Jacob/** via GitHub Pages (branch `main`, pasta raiz). Responder ao utilizador em **português de Portugal**.
 
 ## Regras do projeto
 - **Manter a app leve**: sem frameworks, sem bibliotecas externas, sem CDNs, sem imagens pesadas. Tudo em `index.html` (HTML + CSS + JS inline, vanilla JS).
@@ -36,6 +36,7 @@ App **só para acompanhar os gastos do mês** (e as entradas). Sem transferênci
   hiddenHab: [habKey, ...],                      // sugestões de habituais escondidas
   recapSeen: "YYYY-MM",                         // último "fecho do mês" fechado
   accInit:   {...},                              // antigo, já não usado (substituído por bases)
+  profile:   {name, done},                       // nome (inicial no canto); done=false mostra as boas-vindas
   lastBackup: timestamp|null, since: timestamp
 }
 ```
@@ -44,6 +45,7 @@ Tema guardado à parte em `localStorage["gastos.theme"]` = `light` | `dark` | `a
 ## Ecrãs e navegação (estilo app de banco)
 Barra de baixo com 3 separadores: **Início · Movimentos · Resumo**. Despesa, Entrada, Metas e dívidas e Definições abrem como páginas por cima, com botão de voltar e sem barra de baixo (`body.sub`). `show(v)` troca de ecrã; `openSub(v)` abre uma página e guarda em `backTo` o separador para onde voltar; `back()` volta.
 - **Início** (`v-home`): cabeçalho com avatar "J" (Definições) e barra "Pesquisar" (abre Movimentos). Gastos do mês em grande (`bigMoney()`), linha com entradas e mês anterior, **orçamento do mês** (`#homeBudget`: barra, quanto resta e quanto podes gastar por dia; toque abre `editBudget()`), 3 ações redondas (Despesa, Entrada, Mais), **Habituais** (com "Editar"), banners, **fecho do mês** e as 6 transações mais recentes.
+- **Boas-vindas** (`v-hello`, `renderHello`): só aparece com dados novos (`profile.done === false`). Pede nome, contas (lista de bancos PT + outras) e orçamento opcional. Dados antigos sem `profile` ficam `done:true` em `migrate()`, por isso o Henrique nunca vê este ecrã.
 - **Fecho do mês** (`renderRecap`): nos primeiros 10 dias do mês, cartão "Outubro em números" (total vs mês anterior, categoria com mais gastos, maior despesa, nº de despesas e média por dia) até o utilizador o fechar (`recapSeen`).
 - **Página Habituais** (`v-hab`, `renderHabPage`): fixas com subir/descer e Editar (`editHabit`); sugeridas com Fixar e Esconder; escondidas com Mostrar.
 - **Habituais** (`renderHabits`, `habits()`): cartões de um toque no Início. Um toque regista a despesa hoje (toast com Anular; toques em menos de 800 ms ignorados). Fixas = `db.quick` (criadas em Mais → Nova despesa habitual, ou "Guardar como habitual" no formulário). Sugeridas = mesma descrição+valor+categoria 3 ou mais vezes nos últimos 90 dias, exceto as de `hiddenHab`. Cada cartão mostra a última vez ("há 4 dias").
@@ -55,7 +57,7 @@ Barra de baixo com 3 separadores: **Início · Movimentos · Resumo**. Despesa, 
 - **Resumo** (`v-sum`): gastos do mês em grande com comparação, previsão e orçamento; tocar numa barra dos 6 meses muda de mês; tocar numa categoria abre os Movimentos filtrados; entradas e saldo do mês, últimos 6 meses (gráfico principal), categorias (barra de partilha + linhas com orçamento), entradas por fonte (`renderSrc`), saldo acumulado no ano.
 - **Metas e dívidas** (`v-wal`, página aberta em Mais): metas de poupança e dívidas (devem-me / eu devo).
 - **Removido a pedido do utilizador:** transferências e o saldo total no Início. Os dados antigos (`tx` do tipo `T`, `accInit`) ficam guardados mas não aparecem; não voltar a pôr sem ele pedir.
-- **Definições** (`v-set`): aparência, recorrentes, habituais, categorias e orçamentos, contas, cópias de segurança (JSON e CSV, ficheiros `jacob-…`), apagar tudo.
+- **Definições** (`v-set`): o teu nome, aparência, recorrentes, habituais, categorias e orçamentos, contas, cópias de segurança (JSON e CSV, ficheiros `jacob-…`), apagar tudo.
 - Linhas de movimentos: `txRow(t)` com `avatar()` (círculo com a inicial na cor da categoria, `catColor()`). Datas relativas com `relDay()` (Hoje, Ontem, 6 nov).
 - `ask(title, fields, opt)` — diálogo genérico reutilizável (tipos: text, money, select, date, number).
 - Nome visível da app: **Jacob**. As chaves `localStorage` `gastos.v1` e `gastos.theme` ficam com o nome antigo de propósito (mudá-las perdia os dados).

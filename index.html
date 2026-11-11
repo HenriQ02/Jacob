@@ -209,6 +209,10 @@ body.home header .hl{flex:none}
 .fchips::-webkit-scrollbar{display:none}
 .fchip{flex:none; display:flex; align-items:center; gap:6px; height:34px; padding:0 14px; border-radius:17px; border:1px solid var(--line); background:var(--card); color:var(--text); font:inherit; font-size:14px}
 .fchip.on{background:var(--text); color:var(--bg); border-color:transparent}
+.fchips.wrap{flex-wrap:wrap; overflow:visible; margin:0; padding:0}
+.hello{padding:8px 4px 0}
+.hello .hi{font-size:32px; line-height:1.15; font-weight:700; letter-spacing:-.01em; margin:16px 0 8px}
+.hello .lead{font-size:15px; color:var(--text-2); margin:0 0 8px}
 .fchip .dot{width:8px; height:8px}
 
 /* ---------- Página Habituais ---------- */
@@ -397,7 +401,7 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     <div class="seg kind"><button data-kind="add">Despesa</button><button class="on" data-kind="inc">Entrada</button></div>
     <input id="iAmount" class="amount pos" inputmode="decimal" placeholder="0,00 €" autocomplete="off">
     <label>De onde veio</label>
-    <input id="iSource" list="srcList" placeholder="ex.: Bolsa SASUM, Pais, OLX" autocomplete="off">
+    <input id="iSource" list="srcList" placeholder="ex.: Salário, Pais, OLX" autocomplete="off">
     <datalist id="srcList"></datalist>
     <div class="chips" id="srcQuick" style="margin-top:8px"></div>
     <label>Tipo</label>
@@ -432,6 +436,22 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
     <div class="card"><h2 id="balTitle">Saldo acumulado no ano</h2><div id="balLine"></div></div>
   </section>
 
+  <!-- BOAS-VINDAS (só na primeira vez, para quem ainda não tem dados) -->
+  <section id="v-hello" class="hidden">
+    <div class="hello">
+      <h2 class="hi">Bem-vindo ao Jacob</h2>
+      <p class="lead">Duas perguntas rápidas para pôr a app à tua maneira. Podes mudar tudo depois em Definições.</p>
+      <label>Como te chamas?</label>
+      <input id="hName" placeholder="O teu nome" autocomplete="given-name">
+      <label>Que contas usas?</label>
+      <div class="fchips wrap" id="hBanks"></div>
+      <input id="hOther" placeholder="Outras, separadas por vírgulas" autocomplete="off" style="margin-top:8px">
+      <label>Orçamento do mês (opcional)</label>
+      <input id="hBudget" inputmode="decimal" placeholder="ex.: 300,00" autocomplete="off">
+      <button class="btn" id="hGo">Começar</button>
+    </div>
+  </section>
+
   <!-- HABITUAIS -->
   <section id="v-hab" class="hidden">
     <div class="card"><div class="cardhead"><h2>As tuas</h2><button class="mini" id="habNew"><span data-i="plus"></span>Nova</button></div><div id="habFixed"></div></div>
@@ -464,6 +484,10 @@ dialog.sheet[open]{animation:rise .3s var(--ease)}
 
   <!-- DEFINIÇÕES -->
   <section id="v-set" class="hidden">
+    <div class="card">
+      <h2>O teu nome</h2>
+      <div style="display:flex; gap:8px"><input id="setName" placeholder="O teu nome" autocomplete="given-name"><button class="mini" id="saveName" style="height:48px; border-radius:24px">Guardar</button></div>
+    </div>
     <div class="card">
       <h2>Aparência</h2>
       <div class="seg" id="themeSeg">
@@ -547,7 +571,8 @@ const DEFAULT = () => ({
     ["💼","Salário / bolsa","R"],["👪","Família","R"],["🏷️","Vendas","R"],["💰","Outras receitas","R"]
   ].map(([emoji,name,type]) => ({id: uid(), emoji, name, type, budget: 0})),
   methods: ["BPI","Revolut","Trade Republic","Dinheiro"],
-  tx: []
+  tx: [],
+  profile: {name: "", done: false}
 });
 const ACCOUNTS = ["BPI","Revolut","Trade Republic","Dinheiro"];
 function migrate(d){
@@ -561,7 +586,9 @@ function migrate(d){
   if (!d.bases || typeof d.bases !== "object") d.bases = {};
   if (typeof d.budget !== "number") d.budget = 0;          // orçamento do mês (cêntimos, 0 = sem)
   if (!Array.isArray(d.hiddenHab)) d.hiddenHab = [];       // sugestões de habituais escondidas (habKey)
-  if (typeof d.recapSeen !== "string") d.recapSeen = "";  // último "fecho do mês" fechado ("YYYY-MM")
+  if (typeof d.recapSeen !== "string") d.recapSeen = "";
+  // perfil: nome (inicial no canto) e se já passou pelas boas-vindas. Dados antigos = já configurado.
+  if (!d.profile || typeof d.profile !== "object") d.profile = {name: "", done: true};  // último "fecho do mês" fechado ("YYYY-MM")
   d.version = 3;
   if (!("lastBackup" in d)) d.lastBackup = null;
   if (!d.since) d.since = Date.now();
@@ -723,7 +750,7 @@ const methodOptions = () => db.methods.map(m => [m,m]);
 
 /* ================= Navegação ================= */
 // separadores (barra de baixo) e páginas que abrem por cima com botão de voltar
-const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", acc:"Contas e saldos", hab:"Habituais", wal:"Metas e dívidas", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
+const TITLES = {home:"Início", list:"Movimentos", sum:"Resumo", acc:"Contas e saldos", hab:"Habituais", hello:"", wal:"Metas e dívidas", add:"Nova despesa", inc:"Nova entrada", set:"Definições"};
 const TABS = ["home","list","sum"];
 let view = "home", backTo = "home";
 function show(v){
@@ -736,8 +763,9 @@ function show(v){
   $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
   $("#title").textContent = editingId && v==="add" ? "Editar despesa" : iEditId && v==="inc" ? "Editar entrada" : TITLES[v];
   $("#title").classList.toggle("hidden", v === "home");
-  $("#back").classList.toggle("hidden", !sub);
+  $("#back").classList.toggle("hidden", !sub || v === "hello");
   $("#me").classList.toggle("hidden", v !== "home");
+  $("#me").textContent = ((db.profile.name || "").trim()[0] || "J").toUpperCase();
   $("#hdrSearch").classList.toggle("hidden", v !== "home");
   render();
   window.scrollTo(0,0);
@@ -755,7 +783,7 @@ $$(".kind button").forEach(b => b.onclick = () => { if (b.dataset.kind !== view)
 function render(){
   $$(".mlabel").forEach(e => e.textContent = monthLabel(curMonth));
   renderBanners();
-  ({home:renderHome, add:renderForm, inc:renderInc, list:renderList, sum:renderSum, wal:renderWallet, acc:renderAcc, hab:renderHabPage, set:renderSet})[view]();
+  ({home:renderHome, add:renderForm, inc:renderInc, list:renderList, sum:renderSum, wal:renderWallet, acc:renderAcc, hab:renderHabPage, hello:renderHello, set:renderSet})[view]();
 }
 
 /* ================= Início ================= */
@@ -962,7 +990,7 @@ async function editRecurring(r, preset){
   const isNew = !r; r = r || preset;
   const tp = r.type;
   const out = await ask(isNew ? "Novo recorrente" : "Editar recorrente", [
-    {k:"label", label: tp==="R" ? "Fonte" : "Descrição", value: tp==="R" ? r.source : r.note, ph: tp==="R"?"ex.: Bolsa SASUM":"ex.: Spotify"},
+    {k:"label", label: tp==="R" ? "Fonte" : "Descrição", value: tp==="R" ? r.source : r.note, ph: tp==="R"?"ex.: Salário":"ex.: Spotify"},
     {k:"cents", label:"Valor (€)", type:"money", value:r.cents},
     {k:"cat", label:"Categoria", type:"select", options:catOptions(tp), value:r.cat},
     {k:"method", label:"Conta / método", type:"select", options:methodOptions(), value:r.method},
@@ -1375,6 +1403,7 @@ function renderSet(){
     + `<div class="row2"><button class="btn sec small" data-newrec="D">Despesa recorrente</button><button class="btn sec small" data-newrec="R">Entrada recorrente</button></div>`;
   $$("[data-rec]").forEach(b => b.onclick = () => editRecurring(db.recurring.find(r => r.id === b.dataset.rec)));
   $$("[data-newrec]").forEach(b => b.onclick = () => editRecurring(null, {type:b.dataset.newrec, cents:0, cat:null, method:db.methods[0], note:"", source:""}));
+  $("#setName").value = db.profile.name || "";
   $("#budgetInfo").textContent = db.budget ? `${money(db.budget)} por mês` : "Sem orçamento. Define um valor para veres no Início quanto ainda podes gastar.";
   $("#methodsInput").value = db.methods.join(", ");
   const kb = Math.max(1, Math.round((localStorage.getItem(KEY)||"").length / 1024));
@@ -1497,10 +1526,31 @@ $("#wipe").onclick = () => {
   db = migrate(DEFAULT()); save(); renderSet(); toast("Dados apagados");
 };
 
+/* ================= Boas-vindas ================= */
+const BANKS = ["CGD","Millennium BCP","BPI","Novo Banco","Santander","Crédito Agrícola","ActivoBank","Moey","Revolut","Trade Republic","Dinheiro"];
+const helloSel = new Set(["Dinheiro"]);
+function renderHello(){
+  $("#hBanks").innerHTML = BANKS.map(b => `<button class="fchip ${helloSel.has(b)?"on":""}" data-bank="${esc(b)}">${esc(b)}</button>`).join("");
+  $$("#hBanks [data-bank]").forEach(e => e.onclick = () => { const b = e.dataset.bank; helloSel.has(b) ? helloSel.delete(b) : helloSel.add(b); renderHello(); });
+}
+$("#hGo").onclick = () => {
+  const name = $("#hName").value.trim();
+  const others = $("#hOther").value.split(",").map(s => s.trim()).filter(Boolean);
+  // contas pela ordem da lista, depois as escritas à mão; "Dinheiro" vai para o fim
+  const accs = [...new Set([...BANKS.filter(b => helloSel.has(b) && b !== "Dinheiro"), ...others, ...(helloSel.has("Dinheiro") ? ["Dinheiro"] : [])])];
+  db.methods = accs.length ? accs : ["Dinheiro"];
+  const b = parseCents($("#hBudget").value); if (b) db.budget = b;
+  db.profile = {name, done: true};
+  save(); show("home");
+  toast(name ? `Tudo pronto, ${name}` : "Tudo pronto");
+};
+$("#saveName").onclick = () => { db.profile.name = $("#setName").value.trim(); save(); toast("Nome guardado"); };
+
 /* ================= Arranque ================= */
 genRecurring();
 const startV = new URLSearchParams(location.search).get("v");
-if (startV === "add" || startV === "inc") openSub(startV); else show(TITLES[startV] ? startV : "home");
+if (!db.profile.done) show("hello");
+else if (startV === "add" || startV === "inc") openSub(startV); else show(TITLES[startV] ? startV : "home");
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { genRecurring(); render(); } });
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
